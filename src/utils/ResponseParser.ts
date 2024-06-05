@@ -1,5 +1,5 @@
 export function escapeParse(message: string) {
   return message
   .replace(/\n/g, '<br />')
-  .replace(/\t/g, '&nbsp;')
+  .replace(/\t/g, '&emsp;')
 }

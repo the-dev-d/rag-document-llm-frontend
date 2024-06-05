@@ -3,27 +3,7 @@ import { ref } from 'vue'
 
 export const connectionStatus = ref(false)
 
-const API_URL = import.meta.env.VITE_HTTP_HOST
 const SOCKET_URL = import.meta.env.VITE_SOCKET_HOST
-
-export async function sendPrompt(prompt: string) {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      prompt
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-  const status = response.ok
-  const data = await response.json()
-
-  return {
-    status,
-    ...data
-  }
-}
 
 const socket = io(SOCKET_URL, {
   reconnection: true,
@@ -52,13 +32,13 @@ export function initializeSocket() {
 }
 
 function onRecieveReply(callback: CallableFunction) {
-  socket.on('final_result', (data) => {
+  socket.on('handle_chat', (data) => {
     callback(data)
-  })
+  });
 }
 
-function sendQuestion(question: string) {
-  socket.emit('start_chat_session', {
-    question
-  })
+function sendQuestion(message: string) {
+  socket.emit('chat_message', {
+    message
+  });
 }
