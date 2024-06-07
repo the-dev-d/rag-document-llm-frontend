@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router';
-import { sidebar } from './utils/GlobalStates'
 </script>
 
 <template>
