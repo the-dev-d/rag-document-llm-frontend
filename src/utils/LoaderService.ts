@@ -19,7 +19,7 @@ export const AppBarProgress = {
         setTimeout(() => {
                 progress.value = 0;
                 loading.value = false;
-        }, 2000);
+        }, 200);
     },
 
     isLoading: () => {
