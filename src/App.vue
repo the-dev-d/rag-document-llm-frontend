@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router';
+  import { onMounted, onUnmounted } from 'vue';
+  import { RouterView } from 'vue-router';
+  import socket from '@/utils/ChatService'
+  
+  onMounted(() => {
+    window.onbeforeunload = function() {
+      socket.disconnect();
+    };
+  })
 </script>
 
 <template>

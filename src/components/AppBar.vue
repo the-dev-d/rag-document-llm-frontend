@@ -12,12 +12,17 @@
             </div>
         </div>
         <div>
-            <router-link to="/new-file">
-            <button v-if="route.name == 'file_selection'"  type="button" class="text-dark-primary-medium/70 border hover:bg-dark-primary-medium/90 hover:text-white focus:ring-4 focus:outline-none focus:ring-dark-primary-darker font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center dark:border-dark-primary-medium/90 border-dark-primary-medium/90 dark:hover:text-white dark:hover:bg-dark-primary-darker">
+            <RouterLink v-if="route.name == 'file_selection'" to="/new-file">
+            <button  type="button" class="text-dark-primary-medium/70 border hover:bg-dark-primary-medium/90 hover:text-white focus:ring-4 focus:outline-none focus:ring-dark-primary-darker font-medium rounded-full text-sm p-1.5 text-center inline-flex items-center dark:border-dark-primary-medium/90 border-dark-primary-medium/90 dark:hover:text-white dark:hover:bg-dark-primary-darker">
                 <span class="material-symbols-outlined">add</span>
                 <span class="sr-only">Add new</span>
             </button>
-            </router-link>
+            </RouterLink>
+            <RouterLink v-else-if="route.name == 'chat'" to="/">
+                <button title="Back to homepage" class="grid text-xl font-medium text-center text-dark-primary-medium  rounded-full min-w-10 aspect-square outline-none w-full h-full place-items-center hover:bg-black/10 focus:ring-4 focus:outline-none dark:text-teal-300 dark:border-teal-500  dark:focus:ring-teal-800 dark:hover:bg-teal-500">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+          </RouterLink>
         </div>
         </section>
         <div class="w-full bg-gradient-to-r from-dark-primary-medium to-emerald-300 flex items-center justify-end">
@@ -26,8 +31,8 @@
     </nav>
 </template>
 
-<script setup>
+<script setup lang="ts">
     import { AppBarProgress } from '@/utils/LoaderService';
-import { useRoute } from 'vue-router';
+    import { RouterLink, useRoute } from 'vue-router';
     const route = useRoute();
 </script>

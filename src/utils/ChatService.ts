@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 export const connectionStatus = ref(false)
 
@@ -50,14 +50,19 @@ function initializeSocket() {
 
   return {
     onRecieveReply,
-    sendQuestion
+    sendQuestion,
+    uploadFile, 
+    disconnect,
+    removeHandleChatListener
   }
 }
 
-function onRecieveReply(callback: CallableFunction) {
-  socket.on('handle_chat', (data) => {
-    callback(data)
-  });
+function onRecieveReply(callback: (...args: any[]) => void) {
+  socket.on('handle_chat', callback);
+}
+
+function removeHandleChatListener(callback: (...args: any[]) => void) {
+  socket.off('handle_chat', callback);
 }
 
 function sendQuestion(message: string) {
@@ -65,6 +70,14 @@ function sendQuestion(message: string) {
     message,
     db_name: dbManager.selected
   });
+}
+
+function uploadFile(data: any) {
+  socket.emit('chat_message', data);
+}
+
+function disconnect() {
+  socket.disconnect();
 }
 
 export default initializeSocket();

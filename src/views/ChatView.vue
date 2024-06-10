@@ -16,7 +16,10 @@
   const loading = ref(0);
   const prompt = ref('')
   const chatSection = ref<HTMLElement|null>(null);
-  const chats = ref<Chat[]>([{role:'bot', message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \nCurrent documents in my library are: \n\n\t1. CIC SCORES.pdf \n\t2. Prudential norms on Income Recognition, Asset Classification and.pdf \n\t3. SHG.pdf")}])
+  const chats = ref<Chat[]>([{
+    role:'bot', 
+    message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \n\n Loaded Collection : " + dbManager.selected)
+  }])
 
   socket.onRecieveReply((response: {result: string}) => {
       console.log(response);
@@ -103,26 +106,17 @@
         </div>
         
       </section>
-      <section class="box-border flex h-20 gap-3">
+      <section class="box-border flex items-center justify-center h-20 gap-3">
         <textarea
           v-model="prompt"
           v-on:keyup="handleClicks"
           id="message"
-          class="box-border flex-1 p-2 text-sm text-gray-900 bg-transparent border-2 rounded-lg resize-none bg-gray-50 border-slate-400 focus:ring-teal-500 focus:border-blue-500 backdrop-brightness-150 dark:border-teal-600 dark:placeholder-gray-400 dark:text-white focus:outline-none dark:focus:border-teal-400 focus:border-2"
-          placeholder="Ask your questions..."
+          class="box-border flex-1 p-2 text-sm text-gray-900 bg-transparent border-2 rounded-lg resize-none bg-gray-50 border-slate-400 focus:ring-teal-500 focus:border-blue-500 backdrop-brightness-150 dark:border-teal-600 h-full dark:placeholder-gray-400 dark:text-white focus:outline-none dark:focus:border-teal-400 focus:border-2"
+          placeholder="Start typing..."
         ></textarea>
-        <div class="grid grid-rows-2 gap-2">
-          <button v-on:click="sendCurrentPrompt" type="button" class="grid text-xl font-medium text-center text-blue-700 border border-blue-700 rounded-sm min-w-10 aspect-square outline-none w-full h-full place-items-center hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:text-teal-300 dark:border-teal-500 dark:hover:text-white dark:focus:ring-teal-800 dark:hover:bg-teal-500">
-            <i class="fas fa-paper-plane"></i>
-          </button>
-
-          <RouterLink to="/">
-            <button class="grid text-xl font-medium text-center text-blue-700 border border-blue-700 rounded-sm min-w-10 aspect-square outline-none w-full h-full place-items-center hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:text-teal-300 dark:border-teal-500 dark:hover:text-white dark:focus:ring-teal-800 dark:hover:bg-teal-500">
-              <i class="fa-solid fa-arrow-left"></i>
-            </button>
-          </RouterLink>
-          
-        </div>
+        <button v-on:click="sendCurrentPrompt" type="button" class="grid text-xl font-medium text-center text-dark-primary-darker border border-dark-primary-darker rounded-sm h-fit w-fit p-4 outline-none place-items-center hover:bg-dark-primary-medium hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:text-teal-300 dark:border-teal-500 dark:hover:text-white dark:focus:ring-teal-800 dark:hover:bg-teal-500">
+          <i class="fas fa-paper-plane"></i>
+        </button>          
       </section>
     </div>
     <div
