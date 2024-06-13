@@ -3,7 +3,6 @@ import { onMounted, ref } from 'vue'
 
 export const connectionStatus = ref(false)
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_HOST
 
 export const db = ref([]);
 
@@ -18,67 +17,135 @@ class DBManager {
   }
 
   get selected() {
-
     return this._selected;
   }
 
 }
 
-const socket = io(SOCKET_URL, {
-  reconnection: true,
-  reconnectionAttempts: 3,
-  reconnectionDelay: 1000,
-  //transports: ['websocket'],
-  secure: true
-})
+class ApiService {
 
-function initializeSocket() {
+  private BACKEND_URL: string = "";
+  private socket:any;
+  
+  constructor() {
+    this.BACKEND_URL = '';
+  }
 
-  socket.on('fetch_dropdown', (data) => {
-    dbManager.options.value = data;
-  })
+  async loadConfig() {
+    if (this.BACKEND_URL) return; // Prevent re-fetching if already loaded
+    try {
+      const response = await fetch(`config.json`);
+      const config = await response.json();
+      this.BACKEND_URL = config.BACKEND_URL;
 
-  socket.on('connect', () => {
-    connectionStatus.value = true;
-    console.log("connected")
-  })
+      this.socket = io(this.BACKEND_URL, {
+        reconnection: true,
+        reconnectionAttempts: 3,
+        reconnectionDelay: 1000,
+        //transports: ['websocket'],
+        secure: true
+      });
 
+      this.socket.on('fetch_dropdown', (data:any) => {
+        dbManager.options.value = data;
+      })
+    
+      this.socket.on('connect', () => {
+        connectionStatus.value = true;
+        console.log("connected")
+      })
+    
+      this.socket.on('disconnect', () => {
+        connectionStatus.value = false;
+      })
 
-  socket.on('disconnect', () => {
-    connectionStatus.value = false;
-  })
+    } catch (error) {
+      console.error('Error loading config:', error);
+    }
+  }
 
-  return {
-    onRecieveReply,
-    sendQuestion,
-    uploadFile, 
-    disconnect,
-    removeHandleChatListener
+  onRecieveReply(callback: (...args: any[]) => void) {
+    this.socket.on('handle_chat', callback);
+  }
+  
+  removeHandleChatListener(callback: (...args: any[]) => void) {
+    this.socket.off('handle_chat', callback);
+  }
+  
+  sendQuestion(message: string) {
+    this.socket.emit('chat_message', {
+      message,
+      db_name: dbManager.selected
+    });
+  }
+  
+  uploadFile(data: any) {
+    this.socket.emit('chat_message', data);
+  }
+  
+  disconnect() {
+    this.socket.disconnect();
   }
 }
 
-function onRecieveReply(callback: (...args: any[]) => void) {
-  socket.on('handle_chat', callback);
-}
+const apiServiceInstance = new ApiService();
+export default apiServiceInstance;
 
-function removeHandleChatListener(callback: (...args: any[]) => void) {
-  socket.off('handle_chat', callback);
-}
+// const socket = io(SOCKET_URL, {
+//   reconnection: true,
+//   reconnectionAttempts: 3,
+//   reconnectionDelay: 1000,
+//   //transports: ['websocket'],
+//   secure: true
+// })
 
-function sendQuestion(message: string) {
-  socket.emit('chat_message', {
-    message,
-    db_name: dbManager.selected
-  });
-}
+// function initializeSocket() {
 
-function uploadFile(data: any) {
-  socket.emit('chat_message', data);
-}
+//   socket.on('fetch_dropdown', (data) => {
+//     dbManager.options.value = data;
+//   })
 
-function disconnect() {
-  socket.disconnect();
-}
+//   socket.on('connect', () => {
+//     connectionStatus.value = true;
+//     console.log("connected")
+//   })
 
-export default initializeSocket();
+
+//   socket.on('disconnect', () => {
+//     connectionStatus.value = false;
+//   })
+
+//   return {
+//     onRecieveReply,
+//     sendQuestion,
+//     uploadFile, 
+//     disconnect,
+//     removeHandleChatListener
+//   }
+// }
+
+// function onRecieveReply(callback: (...args: any[]) => void) {
+//   socket.on('handle_chat', callback);
+// }
+
+// function removeHandleChatListener(callback: (...args: any[]) => void) {
+//   socket.off('handle_chat', callback);
+// }
+
+// function sendQuestion(message: string) {
+//   socket.emit('chat_message', {
+//     message,
+//     db_name: dbManager.selected
+//   });
+// }
+
+// function uploadFile(data: any) {
+//   socket.emit('chat_message', data);
+// }
+
+// function disconnect() {
+//   socket.disconnect();
+// }
+
+//export default initializeSocket();
 export const dbManager = new DBManager();

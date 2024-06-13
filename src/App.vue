@@ -1,7 +1,13 @@
 <script setup lang="ts">
-  import { onMounted, onUnmounted } from 'vue';
+  import { onMounted } from 'vue';
   import { RouterView } from 'vue-router';
   import socket from '@/utils/ChatService'
+
+
+  const loadConfig = async () => {
+    await socket.loadConfig();
+  }
+  onMounted(loadConfig);
   
   onMounted(() => {
     window.onbeforeunload = function() {
