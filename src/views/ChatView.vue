@@ -2,16 +2,13 @@
   import type { Chat } from '@/types/type'
   import { sidebar } from '@/utils/GlobalStates'
   import { nextTick, ref, watch } from 'vue'
-  import { initializeSocket } from '@/utils/ChatService'
+  import socket from '@/utils/ChatService'
   import { escapeParse } from '@/utils/ResponseParser'
-
 
   const loading = ref(0);
   const prompt = ref('')
   const chatSection = ref<HTMLElement|null>(null);
   const chats = ref<Chat[]>([{role:'bot', message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \nCurrent documents in my library are: \n\n\t1. CIC SCORES.pdf \n\t2. Prudential norms on Income Recognition, Asset Classification and.pdf \n\t3. SHG.pdf")}])
-  const socket = initializeSocket();
-
 
   socket.onRecieveReply((response: {result: string}) => {
       console.log(response);
