@@ -19,7 +19,6 @@ export function parseJSONToTable(data: any[]) {
     )
   })
   tableDom.appendChild(header);
-  data.shift();
 
   data.forEach(record => {
     const row = document.createElement('tr');

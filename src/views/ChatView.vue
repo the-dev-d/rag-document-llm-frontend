@@ -26,6 +26,8 @@
         return;
     
       try {
+        console.log(response);
+
         const parsed = JSON.parse(response);
         const domTable = parseJSONToTable(parsed[0].data);
         
@@ -33,7 +35,7 @@
           role: 'bot',
           message: domTable
         })
-        loading.value = false;
+        loading.value--;
       }catch(e) {
         console.log(e);
       }
