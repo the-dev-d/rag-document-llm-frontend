@@ -46,7 +46,7 @@ class ApiService {
         secure: true
       });
 
-      this.socket.on('fetch_dropdown', (data:any) => {
+      this.socket.on('dropdown_options', (data:any) => {
         dbManager.options.value = data;
       })
     
@@ -64,26 +64,38 @@ class ApiService {
     }
   }
 
-  onRecieveReply(callback: (...args: any[]) => void) {
+  async onRecieveReply(callback: (...args: any[]) => void) {
+    if(!this.BACKEND_URL)
+      await this.loadConfig();
+
     this.socket.on('handle_chat', callback);
   }
   
-  removeHandleChatListener(callback: (...args: any[]) => void) {
+  async removeHandleChatListener(callback: (...args: any[]) => void) {
+    if(!this.BACKEND_URL)
+      await this.loadConfig();
+
     this.socket.off('handle_chat', callback);
   }
   
-  sendQuestion(message: string) {
+  async sendQuestion(message: string) {
+    if(!this.BACKEND_URL)
+      await this.loadConfig();
+
     this.socket.emit('chat_message', {
       message,
-      db_name: dbManager.selected
+      file_name: dbManager.selected
     });
   }
   
-  uploadFile(data: any) {
+  async uploadFile(data: any) {
+    if(!this.BACKEND_URL)
+      await this.loadConfig();
+
     this.socket.emit('chat_message', data);
   }
   
-  disconnect() {
+  async disconnect() {
     this.socket.disconnect();
   }
 }

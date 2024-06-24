@@ -3,7 +3,7 @@
   import { sidebar } from '@/utils/GlobalStates'
   import { nextTick, ref, watch } from 'vue'
   import socket, { dbManager } from '@/utils/ChatService'
-  import { escapeParse } from '@/utils/ResponseParser'
+  import { escapeParse, parseJSONToTable } from '@/utils/ResponseParser'
   import { useRouter } from 'vue-router'
 
 
@@ -17,19 +17,26 @@
   const prompt = ref('')
   const chatSection = ref<HTMLElement|null>(null);
   const chats = ref<Chat[]>([{
-    role:'bot', 
+    role:'bot',
     message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \n\n Loaded Collection : " + dbManager.selected)
   }])
 
-  socket.onRecieveReply((response: {result: string}) => {
-      console.log(response);
-      const { result } = response;
-      if(!result)
+  socket.onRecieveReply((response: string) => {
+      if(response === "Loading..")
         return;
-
-      const { value } = loading;
-      loading.value = Math.max(0, value-1);
-      chats.value.push({role: 'bot', message: escapeParse(result)})
+    
+      try {
+        const parsed = JSON.parse(response);
+        const domTable = parseJSONToTable(parsed[0].data);
+        
+        chats.value.push({
+          role: 'bot',
+          message: domTable
+        })
+        loading.value = false;
+      }catch(e) {
+        console.log(e);
+      }
     }
   )
 
@@ -45,12 +52,11 @@
       message: value
     })
     loading.value++;
-    socket.sendQuestion(value); 
-    
+    socket.sendQuestion(value.trim());
+
   }
 
   watch(chats, async (val) => {
-    // console.log(chatSection);
     nextTick(() => {
         if(chatSection.value)
           chatSection.value.scrollTop = chatSection.value.scrollHeight;
@@ -70,7 +76,7 @@
   <div class="grid w-full h-full" :class="{ 'grid-cols-[1fr_1fr]': !sidebar.status.value }">
     <div class="w-full h-full grid grid-rows-[1fr_auto] p-3 gap-2">
       <section ref="chatSection" class="grid content-start max-h-[75svh] gap-5 overflow-y-auto scroll-smooth">
-        <div 
+        <div
         v-for="(chat, index) in chats"
         v-bind:key="index"
         class="flex items-end"
@@ -104,7 +110,7 @@
             <img class="h-8 saturate-0 brightness-200" src="@/assets/loading.gif" alt="">
           </div>
         </div>
-        
+
       </section>
       <section class="box-border flex items-center justify-center h-20 gap-3">
         <textarea
@@ -116,7 +122,7 @@
         ></textarea>
         <button v-on:click="sendCurrentPrompt" type="button" class="grid text-xl font-medium text-center text-dark-primary-darker border border-dark-primary-darker rounded-sm h-fit w-fit p-4 outline-none place-items-center hover:bg-dark-primary-medium hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:text-teal-300 dark:border-teal-500 dark:hover:text-white dark:focus:ring-teal-800 dark:hover:bg-teal-500">
           <i class="fas fa-paper-plane"></i>
-        </button>          
+        </button>
       </section>
     </div>
     <div
@@ -133,6 +139,11 @@
 </template>
 
 <style>
+td, th {
+  border: 1px solid white;
+  padding: 0.5rem;
+  @apply text-sm;
+}
 .bubble-right::after {
   content: '';
   position: absolute;
