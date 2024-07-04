@@ -1,13 +1,17 @@
 <script setup lang="ts">
   import type { Chat } from '@/types/type'
   import { sidebar } from '@/utils/GlobalStates'
-  import { nextTick, ref, watch } from 'vue'
+  import { nextTick, onUnmounted, ref, watch } from 'vue'
   import socket, { dbManager } from '@/utils/ChatService'
   import { escapeParse, parseJSONToTable } from '@/utils/ResponseParser'
   import { useRouter } from 'vue-router'
-
+  import PDFViewer from '@/components/PDFViewer.vue'
 
   const router = useRouter();
+
+  onUnmounted(() => {
+    sidebar.status.value = true;
+  })
 
   if(dbManager.selected === "") {
     router.replace("/");
@@ -21,21 +25,64 @@
     message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \n\n Loaded Collection : " + dbManager.selected)
   }])
 
+  function createSourceClickListeners() {
+    const elements = document.querySelectorAll('[data-source="true"]');
+    elements.forEach(el => {
+      el.addEventListener('click', (e) => {
+        handleSourceClick(e.target);
+      })
+    })
+  }
+
+  function handleSourceClick(source: EventTarget|null) {
+    if(!source) return;
+
+    const key: string = (source as HTMLElement).innerText.replace(/[\n\s]/g, "") as string;
+
+    const pageProcessing = () => {
+      const pages = document.querySelectorAll('[data-page]');
+      for(const page of pages) {
+        const innerText: string = JSON.stringify((page as HTMLElement).innerText.replace(/[\n\s]+/g, "")) as string;
+        console.log(innerText);
+        if(innerText.match(key)) {
+          page.scrollIntoView();
+        }
+      }
+    }
+
+    if(sidebar.status.value) {
+      sidebar.status.value = false;
+      nextTick(() => {
+        setTimeout(pageProcessing, 1000)
+      })
+      return;
+    }
+    pageProcessing();
+  }
+
   socket.onRecieveReply((response: string) => {
       if(response === "Loading..")
         return;
     
       try {
-        console.log(response);
 
         const parsed = JSON.parse(response);
-        const domTable = parseJSONToTable(parsed[0].data);
+        let final: string|null = null;
+
+        const {type, data} = parsed[0];
+        console.log(data);
+        if(type == "table")
+          final = parseJSONToTable(data);
+        else
+          final = data
         
-        chats.value.push({
-          role: 'bot',
-          message: domTable
-        })
+        if(final)
+          chats.value.push({
+            role: 'bot',
+            message: final
+          })
         loading.value--;
+        nextTick(createSourceClickListeners)
       }catch(e) {
         console.log(e);
       }
@@ -75,9 +122,9 @@
 </script>
 
 <template>
-  <div class="grid w-full h-full" :class="{ 'grid-cols-[1fr_1fr]': !sidebar.status.value }">
+  <div class="grid w-full h-full" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
     <div class="w-full h-full grid grid-rows-[1fr_auto] p-3 gap-2">
-      <section ref="chatSection" class="grid content-start max-h-[75svh] gap-5 overflow-y-auto scroll-smooth">
+      <section ref="chatSection" class="grid content-start max-h-[75svh] gap-5 overflow-y-auto scroll-smooth px-2">
         <div
         v-for="(chat, index) in chats"
         v-bind:key="index"
@@ -94,7 +141,7 @@
             'bg-bubble-bot rounded-md rounded-bl-none bubble-left text-white ml-6':
               chat.role == 'bot'
           }"
-          class="relative max-w-[85%] md:max-w-[60%] p-3 rounded-md w-fit"
+          class="relative max-w-[80%] p-3 rounded-md w-fit"
           v-html="chat.message"
         >
         </div>
@@ -128,13 +175,13 @@
       </section>
     </div>
     <div
-      v-if="!sidebar.status.value"
-      class="grid w-full h-full backdrop-brightness-90 place-items-center"
+    :class="{'hidden': sidebar.status.value, 'grid': !sidebar.status.value}"
+      class="w-full h-full place-items-center px-6"
     >
       <div
-        class="w-4/5 h-[82vh] min-w-fit max-h-[82vh] overflow-y-auto grid content-start scroll-smooth"
+        class="w-fit h-[83vh] min-w-fit max-h-[83vh] overflow-y-auto grid content-start scroll-smooth gap-1"
       >
-        <!-- <PDFViewer></PDFViewer> -->
+        <PDFViewer></PDFViewer>
       </div>
     </div>
   </div>
