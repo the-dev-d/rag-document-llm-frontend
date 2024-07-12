@@ -1,14 +1,18 @@
 <script setup lang="ts">
   import type { Chat } from '@/types/type'
   import { sidebar } from '@/utils/GlobalStates'
-  import { nextTick, onUnmounted, ref, watch } from 'vue'
+  import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
   import socket, { dbManager } from '@/utils/ChatService'
   import { escapeParse, parseJSONToTable } from '@/utils/ResponseParser'
   import { useRouter } from 'vue-router'
   import PDFViewer from '@/components/PDFViewer.vue'
+  import { Dropdown, initFlowbite } from 'flowbite'
 
   const router = useRouter();
 
+  onMounted(() => {
+    initFlowbite();    
+  })
   onUnmounted(() => {
     sidebar.status.value = true;
   })
@@ -18,12 +22,13 @@
   }
 
   const loading = ref(0);
-  const prompt = ref('')
   const chatSection = ref<HTMLElement|null>(null);
   const chats = ref<Chat[]>([{
     role:'bot',
     message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \n\n Loaded Collection : " + dbManager.selected)
   }])
+
+  const riskList = ['Internal Fraud', 'External Fraud', 'Employment Practices and Workplace Safety', 'Clients, Products, and Business Practice', 'Damage to Physical Assets', 'Business Disruption and Systems Failures', 'Execution, Delivery, and Process Management']
 
   function createSourceClickListeners() {
     const elements = document.querySelectorAll('[data-source="true"]');
@@ -43,7 +48,6 @@
       const pages = document.querySelectorAll('[data-page]');
       for(const page of pages) {
         const innerText: string = JSON.stringify((page as HTMLElement).innerText.replace(/[\n\s]+/g, "")) as string;
-        console.log(innerText);
         if(innerText.match(key)) {
           page.scrollIntoView();
         }
@@ -70,7 +74,6 @@
         let final: string|null = null;
 
         const {type, data} = parsed[0];
-        console.log(data);
         if(type == "table")
           final = parseJSONToTable(data);
         else
@@ -89,13 +92,18 @@
     }
   )
 
-  async function sendCurrentPrompt() {
+  async function sendCurrentPrompt(value:string) {
 
-    const { value } = prompt
     if(value == '' || value == null) {
       return;
     }
-    prompt.value = ''
+
+    const target = document.getElementById('dropdown');
+    const trigger = document.getElementById('dropdownDefaultButton');
+
+    const dropdown = new Dropdown(target, trigger);
+    dropdown.hide();
+
     chats.value.push({
       role: 'user',
       message: value
@@ -109,27 +117,25 @@
     nextTick(() => {
         if(chatSection.value)
           chatSection.value.scrollTop = chatSection.value.scrollHeight;
+        initFlowbite();
       })
   }, {
     deep: true,
   })
 
-  async function handleClicks(e: KeyboardEvent) {
-    if (!e.shiftKey && e.code === 'Enter') {
-      sendCurrentPrompt()
-    }
-  }
 </script>
 
 <template>
   <div class="grid w-full h-full" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
-    <div class="w-full h-full grid grid-rows-[1fr_auto] p-3 gap-2">
-      <section ref="chatSection" class="grid content-start max-h-[75svh] gap-5 overflow-y-auto scroll-smooth px-2">
+    <div class="w-full h-full grid p-3 gap-2">
+      <section ref="chatSection" class="grid content-start max-h-[88vh] h-full gap-5 overflow-y-auto scroll-smooth px-2">
         <div
         v-for="(chat, index) in chats"
         v-bind:key="index"
-        class="flex items-end"
-        :class="{'justify-end': chat.role == 'user'}"
+        >
+        <div
+        class="grid content-end items-end grid-rows-[auto_auto]"
+        :class="{'grid-cols-[1fr_auto] justify-items-end': chat.role == 'user', 'grid-cols-[auto_1fr]': chat.role == 'bot'}"
         >
         <div v-if="chat.role == 'bot'" class="grid w-10 h-10 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
           <i class="scale-125 fa-solid fa-feather"></i>
@@ -148,7 +154,31 @@
         <div v-if="chat.role == 'user'" class="grid w-8 h-8 text-white rounded-full shadow-sm bg-bubble-user place-items-center">
           <i class="fa-solid fa-user"></i>
         </div>
+        <div class="col-start-2 p-3">
+          
+        <div v-if="chat.role == 'bot' && (index === chats.length-1 || index === chats.length-2)" class="w-full gap-3 flex items-center justify-start">
+          <div>
+            <button @click="() => sendCurrentPrompt('Operational Risks')" type="button" class="text-white bg-bubble-bot/70 hover:bg-bubble-bot/80 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5">Operational Risks</button>
+          </div>
+          <div id="dropdown-wrappper">
+            <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="text-white bg-bubble-bot/70 hover:bg-bubble-bot/80  focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center" type="button"> Basel II Categories of Operational Risks <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+            </svg>
+            </button>
+
+            <div id="dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700">
+                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                  <li class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" v-for="(risk, key) in riskList" :key @click="() => sendCurrentPrompt(risk)">
+                    {{ risk }}
+                  </li>
+                </ul>
+            </div>
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
+        
 
         <div v-if="loading != 0" class="flex items-end">
           <div class="grid w-10 h-10 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
@@ -160,18 +190,6 @@
           </div>
         </div>
 
-      </section>
-      <section class="box-border flex items-center justify-center h-20 gap-3">
-        <textarea
-          v-model="prompt"
-          v-on:keyup="handleClicks"
-          id="message"
-          class="box-border flex-1 p-2 text-sm text-gray-900 bg-transparent border-2 rounded-lg resize-none bg-gray-50 border-slate-400 focus:ring-teal-500 focus:border-blue-500 backdrop-brightness-150 dark:border-teal-600 h-full dark:placeholder-gray-400 dark:text-white focus:outline-none dark:focus:border-teal-400 focus:border-2"
-          placeholder="Start typing..."
-        ></textarea>
-        <button v-on:click="sendCurrentPrompt" type="button" class="grid text-xl font-medium text-center text-dark-primary-darker border border-dark-primary-darker rounded-sm h-fit w-fit p-4 outline-none place-items-center hover:bg-dark-primary-medium hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:text-teal-300 dark:border-teal-500 dark:hover:text-white dark:focus:ring-teal-800 dark:hover:bg-teal-500">
-          <i class="fas fa-paper-plane"></i>
-        </button>
       </section>
     </div>
     <div

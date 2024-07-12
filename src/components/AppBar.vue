@@ -11,7 +11,10 @@
             </div>
             </div>
         </div>
-        <div>
+        <div class="flex items-center">
+            <div class="mr-14 border p-1 px-2 rounded-md shadow-sm text-gray-700 uppercase font-semibold text-lg">
+                Procedures
+            </div>
             <RouterLink v-if="route.name == 'file_selection'" to="/new-file">
             <button  type="button" class="text-dark-primary-medium/70 border hover:bg-dark-primary-medium/90 hover:text-white focus:ring-4 focus:outline-none focus:ring-dark-primary-darker font-medium rounded-full text-sm p-1.5 text-center inline-flex items-center dark:border-dark-primary-medium/90 border-dark-primary-medium/90 dark:hover:text-white dark:hover:bg-dark-primary-darker">
                 <span class="material-symbols-outlined">add</span>

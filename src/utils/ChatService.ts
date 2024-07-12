@@ -31,6 +31,10 @@ class ApiService {
     this.BACKEND_URL = '';
   }
 
+  get backend() {
+    return this.BACKEND_URL;
+  }
+
   async loadConfig() {
     if (this.BACKEND_URL) return; // Prevent re-fetching if already loaded
     try {
