@@ -6,17 +6,17 @@
         <div class="flex items-center justify-start h-full">
             <img class="mx-3 rounded-full h-5/6" src="@/assets/logo.png" alt="" />
             <div>
-            <div class="text-base font-semibold dark:text-white text-slate-700 uppercase">
+            <div class="text-xs text-nowrap md:text-base font-semibold dark:text-white text-slate-700 uppercase">
                 magpie AI
             </div>
             </div>
         </div>
-        <div class="flex items-center">
-            <div class="mr-14 border p-1 px-2 rounded-md shadow-sm text-gray-700 uppercase font-semibold text-lg">
+        <div class="flex items-center justify-end gap-3">
+            <div class="text-xs border p-1 px-2 rounded-md shadow-sm text-gray-700 uppercase font-semibold md:text-base">
                 Procedures
             </div>
             <RouterLink v-if="route.name == 'file_selection'" to="/new-file">
-            <button  type="button" class="text-dark-primary-medium/70 border hover:bg-dark-primary-medium/90 hover:text-white focus:ring-4 focus:outline-none focus:ring-dark-primary-darker font-medium rounded-full text-sm p-1.5 text-center inline-flex items-center dark:border-dark-primary-medium/90 border-dark-primary-medium/90 dark:hover:text-white dark:hover:bg-dark-primary-darker">
+            <button  type="button" class="text-dark-primary-medium/70 border hover:bg-dark-primary-medium/90 hover:text-white focus:ring-4 focus:outline-none focus:ring-dark-primary-darker font-medium rounded-full text-sm p-0.5  md:p-1.5 text-center inline-flex items-center dark:border-dark-primary-medium/90 border-dark-primary-medium/90 dark:hover:text-white dark:hover:bg-dark-primary-darker">
                 <span class="material-symbols-outlined">add</span>
                 <span class="sr-only">Add new</span>
             </button>

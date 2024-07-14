@@ -127,7 +127,7 @@
 
 <template>
   <div class="grid w-full h-full" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
-    <div class="w-full h-full grid p-3 gap-2">
+    <div class="w-full h-full grid p-1 md:p-3 gap-2">
       <section ref="chatSection" class="grid content-start max-h-[88vh] h-full gap-5 overflow-y-auto scroll-smooth px-2">
         <div
         v-for="(chat, index) in chats"
@@ -137,7 +137,7 @@
         class="grid content-end items-end grid-rows-[auto_auto]"
         :class="{'grid-cols-[1fr_auto] justify-items-end': chat.role == 'user', 'grid-cols-[auto_1fr]': chat.role == 'bot'}"
         >
-        <div v-if="chat.role == 'bot'" class="grid w-10 h-10 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
+        <div v-if="chat.role == 'bot'" class="grid md:w-10 md:h-10 w-7 h-7 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
           <i class="scale-125 fa-solid fa-feather"></i>
         </div>
           <div
@@ -151,17 +151,17 @@
           v-html="chat.message"
         >
         </div>
-        <div v-if="chat.role == 'user'" class="grid w-8 h-8 text-white rounded-full shadow-sm bg-bubble-user place-items-center">
+        <div v-if="chat.role == 'user'" class="grid md:w-10 md:h-10 w-7 h-7 text-white rounded-full shadow-sm bg-bubble-user place-items-center">
           <i class="fa-solid fa-user"></i>
         </div>
         <div class="col-start-2 p-3">
           
-        <div v-if="chat.role == 'bot' && (index === chats.length-1 || index === chats.length-2)" class="w-full gap-3 flex items-center justify-start">
+        <div v-if="chat.role == 'bot' && (index === chats.length-1 || index === chats.length-2)" class="w-full gap-3 grid md:flex items-center justify-start">
           <div>
-            <button @click="() => sendCurrentPrompt('Operational Risks')" type="button" class="text-white bg-bubble-bot/70 hover:bg-bubble-bot/80 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5">Operational Risks</button>
+            <button @click="() => sendCurrentPrompt('Operational Risks')" type="button" class="text-white w-full text-xs md:text-sm bg-bubble-bot/70 hover:bg-bubble-bot/80 focus:ring-4 font-medium rounded-lg px-5 py-2.5">Operational Risks</button>
           </div>
           <div id="dropdown-wrappper">
-            <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="text-white bg-bubble-bot/70 hover:bg-bubble-bot/80  focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center" type="button"> Basel II Categories of Operational Risks <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="text-white bg-bubble-bot/70 hover:bg-bubble-bot/80  focus:outline-none font-medium rounded-lg text-xs md:text-sm px-5 py-2.5 text-center inline-flex items-center" type="button"> Basel II Categories of Operational Risks <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
             </svg>
             </button>
