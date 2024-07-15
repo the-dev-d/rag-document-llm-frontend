@@ -88,7 +88,7 @@ class ApiService {
 
     this.socket.emit('chat_message', {
       message,
-      file_name: dbManager.selected
+      dropdown_value: dbManager.selected
     });
   }
   

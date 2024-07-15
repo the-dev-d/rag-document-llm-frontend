@@ -65,7 +65,7 @@
   }
 
   socket.onRecieveReply((response: string) => {
-      if(response === "Loading..")
+      if(response === "Loading.." || response === "Loading...")
         return;
     
       try {
@@ -87,7 +87,7 @@
         loading.value--;
         nextTick(createSourceClickListeners)
       }catch(e) {
-        console.log(e);
+        // console.log(e);
       }
     }
   )

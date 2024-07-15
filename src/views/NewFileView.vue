@@ -18,40 +18,40 @@ import ChatService from '@/utils/ChatService';
         if(disabled.value) return
 
         const files = fileUpload.value!;
-        const fileNames:string[] = [];
 
         if (files.length > 0 && name.value) {
-            for (const file of files) {
-                fileNames.push(file.name.trim());
-                const reader = new FileReader();
-                reader.onload = function(event) {
 
-                    if(!event.target || !event.target.result) return;
-                    const arrayBuffer = event.target.result;
-                    const fileData = new Uint8Array(arrayBuffer as ArrayBuffer);
+            const file = files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
 
-                    const data = {
-                        files:fileNames,
-                        filename: file.name.trim(),
-                        filedata: fileData,
-                        db_name: name.value.trim(),
-                        tags: tags.value.trim(),
-                    }        
-                    AppBarProgress.startLoading();
-                    socket.uploadFile(data)
-                    AppBarProgress.progress = 50;
-                    
-                };
-                const handler = (data: any) => {
-                    if (data === "Created DB successfully") {
-                        AppBarProgress.progress = 100;
-                    }
+                if(!event.target || !event.target.result) return;
+                const arrayBuffer = event.target.result;
+                const fileData = new Uint8Array(arrayBuffer as ArrayBuffer);
+
+                const data = {
+                    file_name: file.name.trim(),
+                    file_content: fileData,
+                    db_name: name.value.trim(),
+                    tags: tags.value.trim(),
+                }        
+                AppBarProgress.startLoading();
+                socket.uploadFile(data)
+                AppBarProgress.progress = 50;
+                
+            };
+            const handler = (data: any) => {
+                console.log(data)
+                console.log(("4 Database for "+ file.name.trim() +" created successfully."));
+                if (data === ("4 Database for "+ file.name.trim() +" created successfully.")) {
+                    AppBarProgress.progress = 100;
                     ChatService.removeHandleChatListener(handler);
-                    router.replace("/")
                 }
-                ChatService.onRecieveReply(handler)
-                reader.readAsArrayBuffer(file);
+                router.replace("/")
             }
+            ChatService.onRecieveReply(handler)
+            reader.readAsArrayBuffer(file);
+
         }
     }
 </script>
