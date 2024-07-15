@@ -31,6 +31,10 @@ class ApiService {
     this.BACKEND_URL = '';
   }
 
+  get baseURL() {
+    return this.BACKEND_URL;
+  }
+
   async loadConfig() {
     if (this.BACKEND_URL) return; // Prevent re-fetching if already loaded
     try {
@@ -84,7 +88,7 @@ class ApiService {
 
     this.socket.emit('chat_message', {
       message,
-      file_name: dbManager.selected
+      dropdown_value: dbManager.selected
     });
   }
   

@@ -17,7 +17,7 @@
     router.replace("/");
   }
 
-  const loading = ref(0);
+  const loading = ref(1);
   const prompt = ref('')
   const chatSection = ref<HTMLElement|null>(null);
   const chats = ref<Chat[]>([{
@@ -70,7 +70,6 @@
         let final: string|null = null;
 
         const {type, data} = parsed[0];
-        console.log(data);
         if(type == "table")
           final = parseJSONToTable(data);
         else
@@ -89,21 +88,27 @@
     }
   )
 
-  async function sendCurrentPrompt() {
+  function makeDownload(content: string) {
 
-    const { value } = prompt
-    if(value == '' || value == null) {
+    const popup = window.open('', 'print', 'height=1080,width=1920');
+
+    if(!popup)
       return;
-    }
-    prompt.value = ''
-    chats.value.push({
-      role: 'user',
-      message: value
-    })
-    loading.value++;
-    socket.sendQuestion(value.trim());
 
+    var style = popup.document.createElement('style');
+    style.type = 'text/css';
+    style.textContent = 'td, th {border: 1px solid black; padding: 0.5rem; @apply text-sm;}'; 
+    popup.document.head.appendChild(style);
+    popup.document.body.innerHTML = content;
+
+    popup.print();
+
+    popup.onafterprint = () => {
+      popup.close();
+    }
   }
+
+
 
   watch(chats, async (val) => {
     nextTick(() => {
@@ -114,17 +119,12 @@
     deep: true,
   })
 
-  async function handleClicks(e: KeyboardEvent) {
-    if (!e.shiftKey && e.code === 'Enter') {
-      sendCurrentPrompt()
-    }
-  }
 </script>
 
 <template>
   <div class="grid w-full h-full" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
     <div class="w-full h-full grid grid-rows-[1fr_auto] p-3 gap-2">
-      <section ref="chatSection" class="grid content-start max-h-[75svh] gap-5 overflow-y-auto scroll-smooth px-2">
+      <section ref="chatSection" class="grid content-start max-h-[88svh] gap-5 overflow-y-auto scroll-smooth px-2">
         <div
         v-for="(chat, index) in chats"
         v-bind:key="index"
@@ -134,20 +134,14 @@
         <div v-if="chat.role == 'bot'" class="grid w-10 h-10 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
           <i class="scale-125 fa-solid fa-feather"></i>
         </div>
-          <div
-          :class="{
-            'bg-bubble-user rounded-md rounded-br-none bubble-right text-white mr-6':
-              chat.role == 'user',
-            'bg-bubble-bot rounded-md rounded-bl-none bubble-left text-white ml-6':
-              chat.role == 'bot'
-          }"
-          class="relative max-w-[80%] p-3 rounded-md w-fit"
-          v-html="chat.message"
-        >
-        </div>
-        <div v-if="chat.role == 'user'" class="grid w-8 h-8 text-white rounded-full shadow-sm bg-bubble-user place-items-center">
-          <i class="fa-solid fa-user"></i>
-        </div>
+          <div class="relative max-w-[80%] bg-bubble-bot rounded-bl-none bubble-left text-white ml-6 p-3 rounded-md w-fit">
+            <div v-html="chat.message">
+
+            </div>
+            <button @click="() => makeDownload(chat.message)" v-if="chats.length-1 == index" class="absolute px-5 hover:brightness-200 bottom-0 right-0 translate-y-[110%] p-1 rounded-lg bg-dark-primary-darker">
+              <i class="fa-solid fa-download"></i>
+            </button>
+          </div>
         </div>
 
         <div v-if="loading != 0" class="flex items-end">
@@ -160,18 +154,6 @@
           </div>
         </div>
 
-      </section>
-      <section class="box-border flex items-center justify-center h-20 gap-3">
-        <textarea
-          v-model="prompt"
-          v-on:keyup="handleClicks"
-          id="message"
-          class="box-border flex-1 p-2 text-sm text-gray-900 bg-transparent border-2 rounded-lg resize-none bg-gray-50 border-slate-400 focus:ring-teal-500 focus:border-blue-500 backdrop-brightness-150 dark:border-teal-600 h-full dark:placeholder-gray-400 dark:text-white focus:outline-none dark:focus:border-teal-400 focus:border-2"
-          placeholder="Start typing..."
-        ></textarea>
-        <button v-on:click="sendCurrentPrompt" type="button" class="grid text-xl font-medium text-center text-dark-primary-darker border border-dark-primary-darker rounded-sm h-fit w-fit p-4 outline-none place-items-center hover:bg-dark-primary-medium hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:text-teal-300 dark:border-teal-500 dark:hover:text-white dark:focus:ring-teal-800 dark:hover:bg-teal-500">
-          <i class="fas fa-paper-plane"></i>
-        </button>
       </section>
     </div>
     <div

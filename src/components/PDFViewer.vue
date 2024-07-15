@@ -1,8 +1,9 @@
 <script setup lang="ts">
   import { usePDF, VuePDF } from '@tato30/vue-pdf'
-  import { dbManager } from '@/utils/ChatService'
+  import chatService, { dbManager } from '@/utils/ChatService'
 
-  const fileURL = import.meta.env.VITE_FILE_BASE + dbManager.selected.replace(/ /g, "%20").trim();
+  const fileURL = chatService.baseURL + "/uploads/" + dbManager.selected.replace(/ /g, "%20").trim();
+  console.log(fileURL);
   const { pdf, pages } = usePDF(fileURL)
 
 </script>
