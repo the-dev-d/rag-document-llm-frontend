@@ -19,11 +19,15 @@ import ChatService from '@/utils/ChatService';
 
         const files = fileUpload.value!;
         const fileNames:string[] = [];
-
+        let count = 0;
+        let recieved = 0;
         if (files.length > 0 && name.value) {
+            
             for (const file of files) {
                 fileNames.push(file.name.trim());
                 const reader = new FileReader();
+                AppBarProgress.startLoading();
+                AppBarProgress.progress = 10;
                 reader.onload = function(event) {
 
                     if(!event.target || !event.target.result) return;
@@ -37,17 +41,18 @@ import ChatService from '@/utils/ChatService';
                         db_name: name.value.trim(),
                         tags: tags.value.trim(),
                     }        
-                    AppBarProgress.startLoading();
                     socket.uploadFile(data)
-                    AppBarProgress.progress = 50;
-                    
+                    count++;                    
                 };
                 const handler = (data: any) => {
-                    if (data === "Created DB successfully") {
-                        AppBarProgress.progress = 100;
+                    if (data === "1 "+file.name.trim()+" uploaded successfully" ) {
+                        recieved++;
+                        AppBarProgress.progress = (recieved/count)*100 ;
+                        if(count == recieved) {
+                            ChatService.removeHandleChatListener(handler);
+                            router.replace("/")
+                        }
                     }
-                    ChatService.removeHandleChatListener(handler);
-                    router.replace("/")
                 }
                 ChatService.onRecieveReply(handler)
                 reader.readAsArrayBuffer(file);
