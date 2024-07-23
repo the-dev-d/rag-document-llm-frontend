@@ -10,7 +10,7 @@
 </script>
 
 <template>
-  <div data-page v-for="page in pages" :id="'page-' + page" :key="page">
+  <div class="max-w-[90svw]" data-page v-for="page in pages" :id="'page-' + page" :key="page">
     <VuePDF
       text-layer
       annotation-layer

@@ -126,7 +126,7 @@
 </script>
 
 <template>
-  <div class="grid w-full h-full" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
+  <div class="grid w-full h-full relative" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
     <div class="w-full h-full grid p-1 md:p-3 gap-2">
       <section ref="chatSection" class="grid content-start max-h-[88vh] h-full gap-5 overflow-y-auto scroll-smooth px-2">
         <div
@@ -147,7 +147,7 @@
             'bg-bubble-bot rounded-md rounded-bl-none bubble-left text-white ml-6':
               chat.role == 'bot'
           }"
-          class="relative max-w-[80%] p-3 rounded-md w-fit"
+          class="relative  p-3 rounded-md w-fit"
           v-html="chat.message"
         >
         </div>
@@ -194,13 +194,19 @@
     </div>
     <div
     :class="{'hidden': sidebar.status.value, 'grid': !sidebar.status.value}"
-      class="w-full h-full place-items-center px-6"
+      class="w-full grid-rows-[auto_1fr] h-full max-w-[100svw] bg-white absolute"
     >
+      <div class="h-full mx-2">
+        <button  @click="() => sidebar.status.value = true" class="grid text-xl font-medium text-center text-dark-primary-medium  rounded-full min-w-10 w-10 aspect-square outline-none h-fit place-items-center hover:bg-black/10 focus:ring-4 focus:outline-none dark:text-teal-300 dark:border-teal-500  dark:focus:ring-teal-800 dark:hover:bg-teal-500">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+      </div>      
       <div
-        class="w-fit h-[83vh] min-w-fit max-h-[83vh] overflow-y-auto grid content-start scroll-smooth gap-1"
+        class="w-full max-w-full h-full overflow-y-auto grid content-start scroll-smooth gap-1 bg-red-200"
       >
-        <PDFViewer></PDFViewer>
-      </div>
+      <PDFViewer></PDFViewer>
+      
+      </div> 
     </div>
   </div>
 </template>
