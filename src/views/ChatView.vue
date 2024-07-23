@@ -43,7 +43,6 @@
       const pages = document.querySelectorAll('[data-page]');
       for(const page of pages) {
         const innerText: string = JSON.stringify((page as HTMLElement).innerText.replace(/[\n\s]+/g, "")) as string;
-        console.log(innerText);
         if(innerText.match(key)) {
           page.scrollIntoView();
         }
@@ -122,7 +121,7 @@
 </script>
 
 <template>
-  <div class="grid w-full h-full" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
+  <div class="grid relative w-full h-full items-center" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
     <div class="w-full h-full grid grid-rows-[1fr_auto] p-3 gap-2">
       <section ref="chatSection" class="grid content-start max-h-[88svh] gap-5 overflow-y-auto scroll-smooth px-2">
         <div
@@ -131,10 +130,10 @@
         class="flex items-end"
         :class="{'justify-end': chat.role == 'user'}"
         >
-        <div v-if="chat.role == 'bot'" class="grid w-10 h-10 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
-          <i class="scale-125 fa-solid fa-feather"></i>
+        <div v-if="chat.role == 'bot'" class="grid w-5 h-5 md:w-10 md:h-10 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
+          <i class="scale-75 fa-solid fa-feather"></i>
         </div>
-          <div class="relative max-w-[80%] bg-bubble-bot rounded-bl-none bubble-left text-white ml-6 p-3 rounded-md w-fit">
+          <div class="relative bg-bubble-bot rounded-bl-none bubble-left text-white ml-6 p-3 rounded-md w-fit">
             <div v-html="chat.message">
 
             </div>
@@ -145,26 +144,31 @@
         </div>
 
         <div v-if="loading != 0" class="flex items-end">
-          <div class="grid w-10 h-10 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
-            <i class="scale-125 fa-solid fa-feather"></i>
+          <div class="grid w-5 h-5 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
+            <i class="scale-75 fa-solid fa-feather"></i>
           </div>
 
           <div class="bg-bubble-bot rounded-bl-none bubble-left text-white ml-6 relative max-w-[85%] md:max-w-[60%] px-3 py-2 rounded-md w-fit">
             <img class="h-8 saturate-0 brightness-200" src="@/assets/loading.gif" alt="">
           </div>
         </div>
-
       </section>
     </div>
     <div
     :class="{'hidden': sidebar.status.value, 'grid': !sidebar.status.value}"
-      class="w-full h-full place-items-center px-6"
+      class="w-full grid-rows-[auto_1fr] h-full max-h-[88svh]  max-w-[100svw]  absolute lg:relative bg-slate-200"
     >
+      <div class="h-full mx-2">
+        <button  @click="() => sidebar.status.value = true" class="grid text-xl font-medium text-center text-dark-primary-medium  rounded-full min-w-10 w-10 aspect-square outline-none h-fit place-items-center hover:bg-black/10 focus:ring-4 focus:outline-none dark:text-teal-300 dark:border-teal-500  dark:focus:ring-teal-800 dark:hover:bg-teal-500">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+      </div>      
       <div
-        class="w-fit h-[83vh] min-w-fit max-h-[83vh] overflow-y-auto grid content-start scroll-smooth gap-1"
+        class="w-full max-w-full h-full  overflow-y-auto content-start scroll-smooth gap-1 grid justify-center bg-slate-200 py-3"
       >
-        <PDFViewer></PDFViewer>
-      </div>
+      <PDFViewer></PDFViewer>
+
+      </div> 
     </div>
   </div>
 </template>
