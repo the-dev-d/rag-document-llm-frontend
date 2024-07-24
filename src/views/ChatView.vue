@@ -126,7 +126,7 @@
 </script>
 
 <template>
-  <div class="grid w-full h-full relative" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
+  <div class="grid w-full h-full relative place-items-center" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
     <div class="w-full h-full grid p-1 md:p-3 gap-2">
       <section ref="chatSection" class="grid content-start max-h-[88vh] h-full gap-5 overflow-y-auto scroll-smooth px-2">
         <div
@@ -194,7 +194,7 @@
     </div>
     <div
     :class="{'hidden': sidebar.status.value, 'grid': !sidebar.status.value}"
-      class="w-full grid-rows-[auto_1fr] h-full max-w-[100svw] bg-white absolute"
+      class="w-full grid-rows-[auto_1fr] h-full max-w-[100svw] bg-white absolute xl:relative max-h-[88svh]"
     >
       <div class="h-full mx-2">
         <button  @click="() => sidebar.status.value = true" class="grid text-xl font-medium text-center text-dark-primary-medium  rounded-full min-w-10 w-10 aspect-square outline-none h-fit place-items-center hover:bg-black/10 focus:ring-4 focus:outline-none dark:text-teal-300 dark:border-teal-500  dark:focus:ring-teal-800 dark:hover:bg-teal-500">
@@ -202,7 +202,7 @@
         </button>
       </div>      
       <div
-        class="w-full max-w-full h-full overflow-y-auto grid content-start scroll-smooth gap-1 bg-red-200"
+        class="w-full max-w-full h-full overflow-y-auto grid content-start scroll-smooth gap-1 bg-slate-100 justify-center"
       >
       <PDFViewer></PDFViewer>
       
