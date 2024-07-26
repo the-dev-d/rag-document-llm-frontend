@@ -159,9 +159,7 @@
       class="w-full grid-rows-[auto_1fr] h-full max-h-[88svh]  max-w-[100svw]  absolute lg:relative bg-slate-200"
     >
       <div class="h-full mx-2">
-        <button  @click="() => sidebar.status.value = true" class="grid text-xl font-medium text-center text-dark-primary-medium  rounded-full min-w-10 w-10 aspect-square outline-none h-fit place-items-center hover:bg-black/10 focus:ring-4 focus:outline-none dark:text-teal-300 dark:border-teal-500  dark:focus:ring-teal-800 dark:hover:bg-teal-500">
-          <i class="fa-solid fa-arrow-left"></i>
-        </button>
+        <button @click="() => sidebar.status.value = true" type="button" class="m-3 text-white bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Collapse <i class="fa-solid fa-arrow-right"></i> </button>
       </div>      
       <div
         class="w-full max-w-full h-full  overflow-y-auto content-start scroll-smooth gap-1 grid justify-center bg-slate-200 py-3"
