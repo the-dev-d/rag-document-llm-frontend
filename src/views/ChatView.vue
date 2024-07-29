@@ -133,6 +133,13 @@
 </template>
 
 <style>
+.bg-bubble-bot > a {
+  text-decoration: underline;
+  transition: all 100ms ease-in-out;
+}
+.bg-bubble-bot > a:hover {
+  color: aqua;
+}
 .bubble-right::after {
   content: '';
   position: absolute;
