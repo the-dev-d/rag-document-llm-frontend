@@ -28,5 +28,6 @@ build.tar
 *.njsproj
 *.sln
 *.sw?
+*.tar
 
 *.tsbuildinfo
