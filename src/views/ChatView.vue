@@ -59,16 +59,20 @@
     pageProcessing();
   }
 
-  socket.onRecieveReply((response: string) => {
-      if(response === "Loading..")
+  socket.onRecieveReply((response: any) => {
+      if(response === "Loading...")
         return;
     
       try {
+        
+        if(!response[0]) {
+          return;
+        }
+        const parsed = response[0];
 
-        const parsed = JSON.parse(response);
         let final: string|null = null;
 
-        const {type, data} = parsed[0];
+        const {type, data} = parsed;
         if(type == "table")
           final = parseJSONToTable(data);
         else
@@ -80,34 +84,13 @@
             message: final
           })
         loading.value--;
+        console.log(loading.value)
         nextTick(createSourceClickListeners)
       }catch(e) {
         console.log(e);
       }
     }
   )
-
-  function makeDownload(content: string) {
-
-    const popup = window.open('', 'print', 'height=1080,width=1920');
-
-    if(!popup)
-      return;
-
-    var style = popup.document.createElement('style');
-    style.type = 'text/css';
-    style.textContent = 'td, th {border: 1px solid black; padding: 0.5rem; @apply text-sm;}'; 
-    popup.document.head.appendChild(style);
-    popup.document.body.innerHTML = content;
-
-    popup.print();
-
-    popup.onafterprint = () => {
-      popup.close();
-    }
-  }
-
-
 
   watch(chats, async (val) => {
     nextTick(() => {
@@ -135,11 +118,7 @@
         </div>
           <div class="relative bg-bubble-bot rounded-bl-none bubble-left text-white ml-6 p-3 rounded-md w-fit">
             <div v-html="chat.message">
-
             </div>
-            <button @click="() => makeDownload(chat.message)" v-if="chats.length-1 == index" class="absolute px-5 hover:brightness-200 bottom-0 right-0 translate-y-[110%] p-1 rounded-lg bg-dark-primary-darker">
-              <i class="fa-solid fa-download"></i>
-            </button>
           </div>
         </div>
 
@@ -159,7 +138,7 @@
       class="w-full grid-rows-[auto_1fr] h-full max-h-[88svh]  max-w-[100svw]  absolute lg:relative bg-slate-200"
     >
       <div class="h-full mx-2">
-        <button @click="() => sidebar.status.value = true" type="button" class="m-3 text-white bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Collapse <i class="fa-solid fa-arrow-right"></i> </button>
+        <button @click="() => sidebar.status.value = true" type="button" class="m-3 text-white bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Collapse </button>
       </div>      
       <div
         class="w-full max-w-full h-full  overflow-y-auto content-start scroll-smooth gap-1 grid justify-center bg-slate-200 py-3"

@@ -50,7 +50,7 @@ class ApiService {
         secure: true
       });
 
-      this.socket.on('dropdown_options', (data:any) => {
+      this.socket.on('fetch_dropdown', (data:any) => {
         dbManager.options.value = data;
       })
     
@@ -82,13 +82,13 @@ class ApiService {
     this.socket.off('handle_chat', callback);
   }
   
-  async sendQuestion(message: string) {
+  async sendQuestion(checklist: string) {
     if(!this.BACKEND_URL)
       await this.loadConfig();
 
     this.socket.emit('chat_message', {
-      message,
-      dropdown_value: dbManager.selected
+      dbname: dbManager.selected,
+      checklist
     });
   }
   

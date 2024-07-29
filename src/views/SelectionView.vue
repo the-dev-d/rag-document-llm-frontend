@@ -29,10 +29,11 @@
             </div>
             <div class="gap-6 w-full">
                 <label for="countries" class="block text-nowrap mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Prompt</label>
-                <select v-model="prompt"  id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <select :disabled="!selection"  v-model="prompt"  id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     <option :value="null">__</option>
-                    <option value="Vendor Policy"> Vendor Policy </option>
-                    <option value="Vendor Contract"> Vendor Contract </option>
+                    <option value="CLASSIFICATION OF INCIDENTS"> CLASSIFICATION OF INCIDENTS </option>
+                    <option value="DEFINING THE TPSP POLICY"> DEFINING THE TPSP POLICY </option>
+                    <option value="INFORMATION SECURITY POLICIES AND MEASURES"> INFORMATION SECURITY POLICIES AND MEASURES </option>
                 </select>
             </div>
             <button :disabled="selection === null" v-on:click="handleGoClick()" type="button" class="text-white w-1/3 bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-0 font-medium disabled:bg-slate-400 rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ">Go</button>

@@ -20,18 +20,14 @@ import ChatService from '@/utils/ChatService';
         const files = fileUpload.value!;
         const fileNames:string[] = [];
 
-        if (files.length > 0 && name.value) {
-            for (const file of files) {
-                fileNames.push(file.name.trim());
-                const reader = new FileReader();
-                reader.onload = function(event) {
-
-                    if(!event.target || !event.target.result) return;
+        const file = files[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            if(!event.target || !event.target.result) return;
                     const arrayBuffer = event.target.result;
                     const fileData = new Uint8Array(arrayBuffer as ArrayBuffer);
 
                     const data = {
-                        files:fileNames,
                         filename: file.name.trim(),
                         filedata: fileData,
                         db_name: name.value.trim(),
@@ -40,19 +36,16 @@ import ChatService from '@/utils/ChatService';
                     AppBarProgress.startLoading();
                     socket.uploadFile(data)
                     AppBarProgress.progress = 50;
-                    
-                };
-                const handler = (data: any) => {
-                    if (data === "Created DB successfully") {
-                        AppBarProgress.progress = 100;
-                    }
-                    ChatService.removeHandleChatListener(handler);
-                    router.replace("/")
-                }
-                ChatService.onRecieveReply(handler)
-                reader.readAsArrayBuffer(file);
+        }
+        const handler = (data: any) => {
+            if (data === "4 Database for " + file.name + " created successfully.") {
+                AppBarProgress.progress = 100;
+                ChatService.removeHandleChatListener(handler);
+                router.replace("/")
             }
         }
+        ChatService.onRecieveReply(handler)
+        reader.readAsArrayBuffer(file);
     }
 </script>
 
