@@ -23,7 +23,7 @@
             </RouterLink>
             <RouterLink v-else-if="route.name == 'chat'" to="/">
                 <button title="Back to homepage" class="grid text-xl font-medium text-center text-dark-primary-medium  rounded-full min-w-10 aspect-square outline-none w-full h-full place-items-center hover:bg-black/10 focus:ring-4 focus:outline-none dark:text-teal-300 dark:border-teal-500  dark:focus:ring-teal-800 dark:hover:bg-teal-500">
-                    <i class="fa-solid fa-arrow-left"></i>
+                    <i class="fa-solid fa-house"></i>
                 </button>
           </RouterLink>
         </div>
