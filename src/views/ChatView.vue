@@ -28,7 +28,7 @@
     message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \n\n Loaded Collection : " + dbManager.selected)
   }])
 
-  const riskList = ['All Risks', 'Internal Fraud', 'External Fraud', 'Employment Practices and Workplace Safety', 'Clients, Products, and Business Practice', 'Damage to Physical Assets', 'Business Disruption and Systems Failures', 'Execution, Delivery, and Process Management']
+  const riskList = ['Internal Fraud', 'External Fraud', 'Employment Practices and Workplace Safety', 'Clients, Products, and Business Practice', 'Damage to Physical Assets', 'Business Disruption and Systems Failures', 'Execution, Delivery, and Process Management']
 
   function createSourceClickListeners() {
     const elements = document.querySelectorAll('[data-source="true"]');
@@ -157,6 +157,9 @@
         <div class="col-start-2 p-3">
           
         <div v-if="chat.role == 'bot' && (index === chats.length-1 || index === chats.length-2)" class="w-full gap-3 grid md:flex items-center justify-start">
+          <div>
+            <button @click="() => sendCurrentPrompt('Operational Risks')" type="button" class="text-white w-full text-xs md:text-sm bg-bubble-bot/70 hover:bg-bubble-bot/80 focus:ring-4 font-medium rounded-lg px-5 py-2.5">Operational Risks</button>
+          </div>
           <div id="dropdown-wrappper">
             <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="text-white bg-bubble-bot/70 hover:bg-bubble-bot/80  focus:outline-none font-medium rounded-lg text-xs md:text-sm px-5 py-2.5 text-center inline-flex items-center" type="button"> Basel II Categories of Operational Risks <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
