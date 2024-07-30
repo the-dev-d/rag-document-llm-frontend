@@ -15,6 +15,7 @@ coverage
 *.local
 bugs.txt
 build.tar
+*.tar
 
 /cypress/videos/
 /cypress/screenshots/
