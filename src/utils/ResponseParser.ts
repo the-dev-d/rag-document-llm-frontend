@@ -1,7 +1,14 @@
+import { marked } from 'marked';
+
 export function escapeParse(message: string) {
   return message
   .replace(/\n/g, '<br />')
   .replace(/\t/g, '&emsp;')
+}
+
+export function parseMarkDown(message: string) {
+  message = message.replace(/\*\*[ ]+/g, "**");
+  return marked.parse(message) as string;
 }
 
 export function parseJSONToTable(data: any[]) {

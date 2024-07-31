@@ -28,8 +28,8 @@ const router = createRouter({
       },
       {
         path: '',
-        name: 'file_selection',
-        component: SelectionView
+        name: 'base',
+        redirect: "chat"
       },
       {
         path: '/new-file',

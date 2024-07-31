@@ -25,6 +25,7 @@ class DBManager {
 class ApiService {
 
   private BACKEND_URL: string = "";
+  private SUGGESTIONS = ref([]);
   private socket:any;
   
   constructor() {
@@ -35,12 +36,17 @@ class ApiService {
     return this.BACKEND_URL;
   }
 
+  get SUGGESTED_PROMPTS() {
+        return this.SUGGESTIONS;
+  }
+
   async loadConfig() {
     if (this.BACKEND_URL) return; // Prevent re-fetching if already loaded
     try {
       const response = await fetch(`config.json`);
       const config = await response.json();
       this.BACKEND_URL = config.BACKEND_URL;
+      this.SUGGESTIONS.value = config.SUGGESTED_PROMPTS;
 
       this.socket = io(this.BACKEND_URL, {
         reconnection: true,
@@ -82,13 +88,12 @@ class ApiService {
     this.socket.off('handle_chat', callback);
   }
   
-  async sendQuestion(checklist: string) {
+  async sendQuestion(message: string) {
     if(!this.BACKEND_URL)
       await this.loadConfig();
 
     this.socket.emit('chat_message', {
-      dbname: dbManager.selected,
-      checklist
+      message
     });
   }
   

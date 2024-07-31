@@ -2,90 +2,75 @@
   import type { Chat } from '@/types/type'
   import { sidebar } from '@/utils/GlobalStates'
   import { nextTick, onUnmounted, ref, watch } from 'vue'
-  import socket, { dbManager } from '@/utils/ChatService'
-  import { escapeParse, parseJSONToTable } from '@/utils/ResponseParser'
-  import { useRouter } from 'vue-router'
-  import PDFViewer from '@/components/PDFViewer.vue'
-
-  const router = useRouter();
+  import socket from '@/utils/ChatService'
+  import { parseMarkDown } from '@/utils/ResponseParser'
 
   onUnmounted(() => {
     sidebar.status.value = true;
   })
 
-  if(dbManager.selected === "") {
-    router.replace("/");
-  }
-
-  const loading = ref(1);
+  const loading = ref(0);
   const prompt = ref('')
   const chatSection = ref<HTMLElement|null>(null);
-  const chats = ref<Chat[]>([{
-    role:'bot',
-    message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \n\n Loaded Collection : " + dbManager.selected)
-  }])
+  const chats = ref<Chat[]>([])
+  const  suggested_prompt = socket.SUGGESTED_PROMPTS;
+  //   {
+  //   role:'bot',
+  //   message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \n\n Loaded Collection : " + dbManager.selected)
+  // }
 
-  function createSourceClickListeners() {
-    const elements = document.querySelectorAll('[data-source="true"]');
-    elements.forEach(el => {
-      el.addEventListener('click', (e) => {
-        handleSourceClick(e.target);
-      })
-    })
+  async function handleDownload() {
+
+    const content = chats.value[1].message;
+    const popup = window.open('', "content", "'height=1920,width=1080'")
+    if(!popup)
+      return;
+
+    popup.document.body.innerHTML = content;
+    popup.print();
+    popup.close();
   }
 
-  function handleSourceClick(source: EventTarget|null) {
-    if(!source) return;
+  async function handleCopy() {
+    navigator.clipboard.writeText(chats.value[1].message);
+  }
 
-    const key: string = (source as HTMLElement).innerText.replace(/[\n\s]/g, "") as string;
+  async function sendCurrentPrompt() {
 
-    const pageProcessing = () => {
-      const pages = document.querySelectorAll('[data-page]');
-      for(const page of pages) {
-        const innerText: string = JSON.stringify((page as HTMLElement).innerText.replace(/[\n\s]+/g, "")) as string;
-        if(innerText.match(key)) {
-          page.scrollIntoView();
-        }
-      }
-    }
-
-    if(sidebar.status.value) {
-      sidebar.status.value = false;
-      nextTick(() => {
-        setTimeout(pageProcessing, 1000)
-      })
+    if(prompt.value.trim() == "") {
       return;
     }
-    pageProcessing();
+
+    const { value } = prompt
+    prompt.value = ''
+    chats.value = [];
+    chats.value.push({
+      role: 'user',
+      message: value
+    })
+    loading.value++;
+    socket.sendQuestion(value); 
   }
 
+  async function handleClicks(e: KeyboardEvent) {
+    if (!e.shiftKey && e.code === 'Enter') {
+      sendCurrentPrompt()
+    }
+  }
+
+
   socket.onRecieveReply((response: any) => {
-      if(response === "Loading...")
+      if(response === "Loading")
         return;
     
       try {
-        
-        if(!response[0]) {
-          return;
-        }
-        const parsed = response[0];
 
-        let final: string|null = null;
-
-        const {type, data} = parsed;
-        if(type == "table")
-          final = parseJSONToTable(data);
-        else
-          final = data
-        
-        if(final)
+        if(response.result)
           chats.value.push({
             role: 'bot',
-            message: final
+            message: response.result
           })
         loading.value--;
-        console.log(loading.value)
-        nextTick(createSourceClickListeners)
       }catch(e) {
         console.log(e);
       }
@@ -104,27 +89,74 @@
 </script>
 
 <template>
-  <div class="grid relative w-full h-full items-center" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
-    <div class="w-full h-full grid grid-rows-[1fr_auto] p-3 gap-2">
-      <section ref="chatSection" class="grid content-start max-h-[88svh] gap-5 overflow-y-auto scroll-smooth px-2">
+  <!-- :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }" -->
+  <div class="grid relative w-full h-full items-center grid-rows-[auto_1fr] max-h-full overflow-hidden">
+    <div class="p-3">
+      <div class="mx-auto flex gap-3 items-center">
+        <textarea :disabled="!!chats.length" v-model="prompt" v-on:keyup="handleClicks" id="message" rows="4" class="block p-2.5 flex-1 border-2 text-sm text-gray-900 bg-gray-50 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 resize-none dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Incident Information"></textarea>
+        <div class="grid gap-2">
+          <button :disabled="!!chats.length || prompt.trim() == ''" v-on:click="sendCurrentPrompt" type="button" class="text-white bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-4 h-fit focus:outline-none disabled:bg-gray-600 focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 ">
+            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+            </svg>
+            <span class="sr-only">Send Message</span>
+          </button>
+          <button @click="() => (chats = [])" :disabled="(chats.length%2)!==0" type="button" class="text-white bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-4 h-fit focus:outline-none disabled:bg-gray-600 focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 ">
+            <span class="material-symbols-outlined">
+              restart_alt
+            </span>
+            <span class="sr-only">Send Message</span>
+          </button>
+        </div>
+      </div>
+      <div class="flex gap-1 md:gap-3 py-2 md:flex-row flex-col">
+        <button :disabled="!!chats.length" v-for="(p, index) in suggested_prompt" v-bind:key="index" @click="()=> {prompt = p; sendCurrentPrompt()}"  class="flex-1 disabled:bg-gray-500 text-sm xl:text-base border rounded-md p-2 bg-dark-primary-medium text-white hover:bg-dark-primary-darker border-dark-primary-darker">
+          {{ p }}
+        </button>
+      </div>
+      <div class="grid grid-cols-3">
+
+      </div>
+    </div>
+    <div class="w-full h-full max-h-full overflow-auto grid grid-rows-[1fr_auto] md:p-3 p-1 gap-2 @container">
+      <section ref="chatSection" class="grid content-start max-h-[88svh] gap-5 scroll-smooth px-2">
         <div
         v-for="(chat, index) in chats"
         v-bind:key="index"
         class="flex items-end"
         :class="{'justify-end': chat.role == 'user'}"
         >
-        <div v-if="chat.role == 'bot'" class="grid w-5 h-5 md:w-10 md:h-10 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
-          <i class="scale-75 fa-solid fa-feather"></i>
-        </div>
-          <div class="relative bg-bubble-bot rounded-bl-none bubble-left text-white ml-6 p-3 rounded-md w-fit">
-            <div v-html="chat.message">
+          <div v-if="chat.role == 'bot'" class="grid text-white rounded-full shadow-sm place-items-center bg-bubble-bot w-8 h-8 mb-10">
+            <i class="fa-solid fa-feather"></i>
+          </div>
+          <div class="w-fit h-fit grid">
+            <div
+            :class="{
+              'bg-bubble-user rounded-md rounded-br-none bubble-right text-white mr-6 md:ml-12':
+                chat.role == 'user',
+              'bg-bubble-bot rounded-md rounded-bl-none bubble-left text-white ml-6 md:mr-12 max-h-[40dvh] @md:max-h-[43dvh] @3xl:max-h-[50dvh] @5xl:max-h-[52dvh] overflow-auto':
+                chat.role == 'bot'
+            }"
+            class="relative p-3 rounded-md w-fit chat"
+            v-html="chat.role == 'bot' ? parseMarkDown(chat.message) : chat.message">
             </div>
+            <div class="ml-5 mt-3 flex gap-2" v-if="chat.role == 'bot'">
+              <button @click="handleDownload" class="w-fit px-4 py-1 rounded-md bg-dark-primary-medium text-white hover:bg-dark-primary-darker">
+                <i class="fa-solid fa-download"></i>
+              </button>
+              <button @click="handleCopy" class="w-fit px-4 py-1 rounded-md bg-dark-primary-medium text-white hover:bg-dark-primary-darker">
+                <i class="fa-solid fa-clipboard"></i>
+              </button>
+            </div>
+          </div>
+          <div v-if="chat.role == 'user'" class="grid w-8 h-8 text-white rounded-full shadow-sm bg-bubble-user place-items-center">
+            <i class="fa-solid fa-user"></i>
           </div>
         </div>
 
         <div v-if="loading != 0" class="flex items-end">
-          <div class="grid w-5 h-5 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
-            <i class="scale-75 fa-solid fa-feather"></i>
+          <div class="grid w-8 h-8 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
+            <i class="fa-solid fa-feather"></i>
           </div>
 
           <div class="bg-bubble-bot rounded-bl-none bubble-left text-white ml-6 relative max-w-[85%] md:max-w-[60%] px-3 py-2 rounded-md w-fit">
@@ -132,20 +164,6 @@
           </div>
         </div>
       </section>
-    </div>
-    <div
-    :class="{'hidden': sidebar.status.value, 'grid': !sidebar.status.value}"
-      class="w-full grid-rows-[auto_1fr] h-full max-h-[88svh]  max-w-[100svw]  absolute lg:relative bg-slate-200"
-    >
-      <div class="h-full mx-2">
-        <button @click="() => sidebar.status.value = true" type="button" class="m-3 text-white bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Collapse </button>
-      </div>      
-      <div
-        class="w-full max-w-full h-full  overflow-y-auto content-start scroll-smooth gap-1 grid justify-center bg-slate-200 py-3"
-      >
-      <PDFViewer></PDFViewer>
-
-      </div> 
     </div>
   </div>
 </template>
@@ -167,7 +185,9 @@ td, th {
   @apply bg-bubble-user;
   clip-path: polygon(0 0, 50% 0, 100% 100%, 0% 100%);
 }
-
+.chat > * {
+  margin: 0.5rem 0rem;
+}
 .bubble-left::after {
   content: '';
   position: absolute;

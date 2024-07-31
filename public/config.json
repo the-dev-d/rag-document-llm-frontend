@@ -1,4 +1,5 @@
 {
-    "BACKEND_URL": "https://mirror17.gieom.com"
+    "BACKEND_URL": "https://mirror5.gieom.com",
+    "SUGGESTED_PROMPTS": ["Generate a report for 'ATM Malfunctioning", "Generate a report for 'ATM Malfunctioning", "Generate a report for 'ATM Malfunctioning"]
 }
     
