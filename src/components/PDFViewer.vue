@@ -2,10 +2,10 @@
   import { usePDF, VuePDF } from '@tato30/vue-pdf'
   import { dbManager } from '@/utils/ChatService'
   import chatService from '@/utils/ChatService'
-import { onMounted } from 'vue';
+  import { onMounted } from 'vue';
 
 
-  const fileURL = chatService.backend + "/uploads/" + dbManager.selected.replace(/ /g, "%20").trim();
+  const fileURL = chatService.backend + "/uploads/" + dbManager.selected?.file_name.replace(/ /g, "%20").trim();
   const { pdf, pages } = usePDF(fileURL)
 
   let height = 0;

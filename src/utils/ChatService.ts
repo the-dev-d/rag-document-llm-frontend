@@ -9,10 +9,10 @@ export const db = ref([]);
 
 class DBManager {
 
-  private _selected: string = "";
-  public options = ref([]);
+  private _selected: {database_name: string, file_name:string} | null = null;
+  public options = ref<{database_name: string, file_name:string}[]>([]);
 
-  setSelected(db: string) {
+  setSelected(db: {database_name: string, file_name:string}) {
     this._selected = db;  
   }
 
@@ -53,6 +53,10 @@ class ApiService {
       this.socket.on('dropdown_options', (data:any) => {
         dbManager.options.value = data;
       })
+
+      this.socket.on('files', (data:any) => {
+        dbManager.options.value = data;
+      })
     
       this.socket.on('connect', () => {
         connectionStatus.value = true;
@@ -88,7 +92,7 @@ class ApiService {
 
     this.socket.emit('chat_message', {
       message,
-      dropdown_value: dbManager.selected
+      dropdown_value: dbManager.selected?.database_name
     });
   }
   
