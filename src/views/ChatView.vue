@@ -3,8 +3,8 @@
   import { sidebar } from '@/utils/GlobalStates'
   import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
   import socket from '@/utils/ChatService'
-  import { parseMarkDown } from '@/utils/ResponseParser'
-import { initFlowbite, initTooltips } from 'flowbite'
+  import { makeInputBoxes, parseMarkDown } from '@/utils/ResponseParser'
+  import { initFlowbite, initTooltips } from 'flowbite'
 
   onUnmounted(() => {
     sidebar.status.value = true;
@@ -15,9 +15,9 @@ import { initFlowbite, initTooltips } from 'flowbite'
   })
 
   const loading = ref(0);
-  const prompt = ref('')
+  const prompt = ref('');
   const chatSection = ref<HTMLElement|null>(null);
-  const chats = ref<Chat[]>([])
+  const chats = ref<Chat[]>([]);
   const copyTooltip = ref("Copy");
   const  suggested_prompt = socket.SUGGESTED_PROMPTS;
   //   {
@@ -25,22 +25,72 @@ import { initFlowbite, initTooltips } from 'flowbite'
   //   message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \n\n Loaded Collection : " + dbManager.selected)
   // }
 
+  function createFlattenedContent() {
+    const dynamicBoxes = document.querySelectorAll("input[data-dynamic-box]");
+    const values: string[] = [];
+    dynamicBoxes.forEach(box => {
+      const value = box.getAttribute("data-value") || "";
+      values.push(value);
+    })
+
+    let oldMessage = chats.value[1].message;
+    let newMessage = chats.value[1].message;
+    do {
+      oldMessage = newMessage;
+      newMessage = oldMessage.replace("<input type='text' data-dynamic-box data-value='' />", values.splice(0,1)[0])
+    }
+    while (oldMessage != newMessage);
+    return newMessage;
+  }
+
   async function handleDownload() {
 
-    const content = chats.value[1].message;
-    const popup = window.open('', "c", "'height=1920,width=1080'")
-    console.log(popup);
+    const newMessage = createFlattenedContent();
+
+    const container = document.createElement('div');
+    container.innerHTML = newMessage;
+
+    const popup = window.open('', "c", "'height=1920,width=1080'");
     if(!popup)
       return;
-
-    popup.document.body.innerHTML = parseMarkDown(content);
+    popup.document.body.innerHTML = newMessage;
     popup.print();
-    popup.onafterprint = () => popup.close();
-    //popup.close();
+    popup.onafterprint = () => popup.close()
+    
+  }
+
+  function getSelectableContent(el: HTMLDivElement) {
+  const walker = document.createTreeWalker(
+    el,
+    NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: function(node) {
+          if (node.parentNode!.nodeName === "SCRIPT" || 
+            node.parentNode!.nodeName === "STYLE" || 
+            getComputedStyle(node.parentNode as Element).visibility === "hidden" || 
+            getComputedStyle(node.parentNode as Element).display === "none") {
+            return NodeFilter.FILTER_REJECT;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+    let content = '';
+    while (walker.nextNode()) {
+      content += walker.currentNode.nodeValue;
+    }
+
+    return content;
   }
 
   async function handleCopy() {
-    navigator.clipboard.writeText(chats.value[1].message);
+    const newMessage = createFlattenedContent();
+    const div = document.createElement('div');
+    div.innerHTML = newMessage;
+
+    const content = getSelectableContent(div);
+    console.log(content);
+    navigator.clipboard.writeText(content);
     if(copyTooltip.value === "Copy") {
       copyTooltip.value = "Copied ✔️";
       setTimeout(() => {copyTooltip.value = "Copy"}, 2000)
@@ -80,7 +130,7 @@ import { initFlowbite, initTooltips } from 'flowbite'
         if(response.result)
           chats.value.push({
             role: 'bot',
-            message: response.result
+            message: makeInputBoxes(parseMarkDown(response.result))
           })
         loading.value--;
       }catch(e) {
@@ -92,12 +142,23 @@ import { initFlowbite, initTooltips } from 'flowbite'
   watch(chats, async (val) => {
     nextTick(() => {
         initTooltips();
+        setDynamicEvents();
         if(chatSection.value)
           chatSection.value.scrollTop = chatSection.value.scrollHeight;
       })
   }, {
     deep: true,
   })
+
+  function setDynamicEvents() {
+
+    const dynamicInputs = document.querySelectorAll('input[data-dynamic-box]');
+    dynamicInputs.forEach(input => {
+      input.addEventListener('keyup', () => {
+        input.setAttribute('data-value', (input as HTMLInputElement).value);
+      })
+    })
+  }
 
 </script>
 
@@ -227,5 +288,11 @@ td, th {
   @apply bg-bubble-bot;
   translate: -50% 0px;
   clip-path: polygon(50% 0, 100% 0, 100% 100%, 0% 100%);
+}
+input {
+  padding: 0 !important;
+  color:black !important;
+  font-size: small !important;
+  border-radius: 5px !important;
 }
 </style>

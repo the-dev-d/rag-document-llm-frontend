@@ -6,6 +6,11 @@ export function escapeParse(message: string) {
   .replace(/\t/g, '&emsp;')
 }
 
+export function makeInputBoxes(markup: string) {
+
+  return markup.replace(/:<\/p>/g, " : <input type='text' data-dynamic-box data-value='' /></p>");
+}
+
 export function parseMarkDown(message: string) {
   message = message.replace(/\*\*[ ]+/g, "**");
   return marked.parse(message) as string;
