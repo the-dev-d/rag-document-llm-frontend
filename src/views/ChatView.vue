@@ -7,6 +7,8 @@
   import { useRouter } from 'vue-router'
   import PDFViewer from '@/components/PDFViewer.vue'
   import { Dropdown, initFlowbite } from 'flowbite'
+  import ExcelJS from 'exceljs'
+  import { saveAs } from 'file-saver'
 
   const router = useRouter();
 
@@ -108,6 +110,28 @@
 
   }
 
+  function makeDownload(content: string) {
+    const div = document.createElement("div");
+    div.innerHTML = content;
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('My Sheet');
+
+    const tableBody = div.childNodes[0].childNodes[0];
+    for(const tableRow of tableBody.childNodes) {
+      const rowEl = [];
+      for(const tableCell of tableRow.childNodes)  {
+        rowEl.push(tableCell.textContent);
+      }
+      sheet.addRow(rowEl);
+    }
+
+    workbook.xlsx.writeBuffer()
+      .then((buffer) => {
+        saveAs(new Blob([buffer], {type: 'application/octet-stream'}),'download.xlsx')
+      })
+  }
+
   watch(chats, async (val) => {
     nextTick(() => {
         if(chatSection.value)
@@ -151,13 +175,12 @@
         </div>
         <div class="col-start-2 p-3">
           
-        <div v-if="chat.role == 'bot' && (index === chats.length-1 || index === chats.length-2)" class="w-full gap-3 grid md:flex items-center justify-start">
+        <div v-if="chat.role == 'bot' && (index === chats.length-1 || index === chats.length-2)" class="w-full gap-3 flex md:flex items-center justify-start">
           <div id="dropdown-wrappper">
             <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="text-white bg-bubble-bot/70 hover:bg-bubble-bot/80  focus:outline-none font-medium rounded-lg text-xs md:text-sm px-5 py-2.5 text-center inline-flex items-center" type="button"> Categories of Operational Risks <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
             </svg>
             </button>
-
             <div id="dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700">
                 <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
                   <li class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" v-for="(risk, key) in riskList" :key @click="() => sendCurrentPrompt(risk)">
@@ -165,6 +188,13 @@
                   </li>
                 </ul>
             </div>
+            <div>
+          </div>
+          </div>
+          <div v-if="index !== 0">
+            <button @click="() => makeDownload(chat.message)" v-if="chats.length-1 == index" class=" px-5 hover:brightness-200 p-1 rounded-lg bg-dark-primary-darker text-white">
+              <i class="fa-solid fa-download"></i>
+            </button>
           </div>
         </div>
       </div>
