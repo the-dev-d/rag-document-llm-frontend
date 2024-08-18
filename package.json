@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@tato30/vue-pdf": "^1.9.6",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
     "flowbite": "^2.3.0",
     "fs": "^0.0.1-security",
     "pdfjs-dist": "^4.1.392",
@@ -25,6 +27,7 @@
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",
     "@tsconfig/node20": "^20.1.4",
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^20.14.2",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/eslint-config-prettier": "^9.0.0",

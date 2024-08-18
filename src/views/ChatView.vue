@@ -6,7 +6,10 @@
   import { escapeParse, parseJSONToTable } from '@/utils/ResponseParser'
   import { useRouter } from 'vue-router'
   import PDFViewer from '@/components/PDFViewer.vue'
+  import ExcelJS from 'exceljs'
+  import { saveAs } from 'file-saver'
 
+  
   const router = useRouter();
 
   onUnmounted(() => {
@@ -101,6 +104,28 @@
     deep: true,
   })
 
+  function makeDownload(content: string) {
+    const div = document.createElement("div");
+    div.innerHTML = content;
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('My Sheet');
+
+    const tableBody = div.childNodes[0].childNodes[0];
+    for(const tableRow of tableBody.childNodes) {
+      const rowEl = [];
+      for(const tableCell of tableRow.childNodes)  {
+        rowEl.push(tableCell.textContent);
+      }
+      sheet.addRow(rowEl);
+    }
+
+    workbook.xlsx.writeBuffer()
+      .then((buffer) => {
+        saveAs(new Blob([buffer], {type: 'application/octet-stream'}),'download.xlsx')
+      })
+  }
+
 </script>
 
 <template>
@@ -110,15 +135,23 @@
         <div
         v-for="(chat, index) in chats"
         v-bind:key="index"
-        class="flex items-end"
-        :class="{'justify-end': chat.role == 'user'}"
+        class="grid"
         >
-        <div v-if="chat.role == 'bot'" class="grid w-5 h-5 md:w-10 md:h-10 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
-          <i class="scale-75 fa-solid fa-feather"></i>
-        </div>
-          <div class="relative bg-bubble-bot rounded-bl-none bubble-left text-white ml-6 p-3 rounded-md w-fit">
-            <div v-html="chat.message">
+          <div :class="{'justify-end': chat.role == 'user'}" class="flex items-end">
+            <div v-if="chat.role == 'bot'" class="grid w-5 h-5 md:w-10 md:h-10 text-white rounded-full shadow-sm place-items-center bg-bubble-bot">
+            <i class="scale-75 fa-solid fa-feather"></i>
+          </div>
+          <div>
+            <div class="relative bg-bubble-bot rounded-bl-none bubble-left text-white ml-6 p-3 rounded-md w-fit">
+              <div v-html="chat.message">
+              </div>
             </div>
+          </div>
+          </div>
+          <div v-if="index == chats.length-1 && index !== 0" class="ml-16 my-2">
+            <button @click="() => makeDownload(chat.message)"  class=" px-5 hover:brightness-200 p-1 rounded-lg bg-dark-primary-darker text-white">
+              <i class="fa-solid fa-download"></i>
+            </button>
           </div>
         </div>
 
