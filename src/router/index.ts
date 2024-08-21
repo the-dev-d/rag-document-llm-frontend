@@ -4,6 +4,7 @@ import SelectionView from '../views/SelectionView.vue'
 import MainView from '../views/MainView.vue'
 import LoginView from '../views/LoginView.vue'
 import NewFileView from '../views/NewFileView.vue'
+import TestView from '@/views/TestView.vue'
 
 
 

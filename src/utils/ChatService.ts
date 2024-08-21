@@ -55,6 +55,7 @@ class ApiService {
       })
 
       this.socket.on('files', (data:any) => {
+        console.log(data);
         dbManager.options.value = data;
       })
     

@@ -6,6 +6,7 @@
   import { escapeParse, parseJSONToTable } from '@/utils/ResponseParser'
   import { useRouter } from 'vue-router'
   import PDFViewer from '@/components/PDFViewer.vue'
+  import DocxViewer from '@/components/DocxViewer.vue';
   import { Dropdown, initFlowbite } from 'flowbite'
   import ExcelJS from 'exceljs'
   import { saveAs } from 'file-saver'
@@ -44,14 +45,29 @@
   function handleSourceClick(source: EventTarget|null) {
     if(!source) return;
 
-    const key: string = (source as HTMLElement).innerText.replace(/[\n\s]/g, "") as string;
+    let key: string = "" 
+    if(dbManager.selected?.file_name.endsWith(".pdf"))
+      key = (source as HTMLElement).innerText.replace(/[\n\s]/g, "") as string;
+    else 
+      key = (source as HTMLElement).innerText as string;
 
     const pageProcessing = () => {
-      const pages = document.querySelectorAll('[data-page]');
+      let pages;
+      if(dbManager.selected?.file_name.endsWith(".pdf"))
+        pages = document.querySelectorAll('[data-page]')
+      else
+        pages = document.getElementsByClassName('docx-wrapper')[0].childNodes;
+
       for(const page of pages) {
-        const innerText: string = JSON.stringify((page as HTMLElement).innerText.replace(/[\n\s]+/g, "")) as string;
+        
+        let innerText: string = "";
+        if(dbManager.selected?.file_name.endsWith(".pdf"))
+          innerText = JSON.stringify((page as HTMLElement).innerText.replace(/[\n\s]+/g, "")) as string;
+        else
+          innerText = JSON.stringify((page as HTMLElement).innerText) as string;
+        console.log(innerText.match(key), key);
         if(innerText.match(key)) {
-          page.scrollIntoView();
+          (page as HTMLElement).scrollIntoView();
         }
       }
     }
@@ -222,9 +238,9 @@
         <button @click="() => sidebar.status.value = true" type="button" class="m-3 text-white bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Collapse </button>
       </div>      
       <div
-        class="w-full max-w-full h-full overflow-y-auto grid content-start scroll-smooth gap-1 bg-slate-100 justify-center"
-      >
-      <PDFViewer></PDFViewer>
+        class="w-full max-w-full h-full overflow-y-auto grid content-start scroll-smooth gap-1 bg-slate-100 justify-center">
+        <PDFViewer v-if="dbManager.selected?.file_name.endsWith('.pdf')"></PDFViewer>
+        <DocxViewer v-if="dbManager.selected?.file_name.endsWith('.docx')"></DocxViewer>
       </div> 
     </div>
   </div>
