@@ -8,7 +8,9 @@ export function escapeParse(message: string) {
 
 export function makeInputBoxes(markup: string) {
 
-  return markup.replace(/:<\/p>/g, " : <input type='text' data-dynamic-box data-value='' /></p>");
+  return markup
+  .replace(/:<\/p>/g, " : <input type='text' data-dynamic-box data-value='' /></p>")
+  .replace(/\[.+\]/, " : <input type='text' data-dynamic-box data-value='' /></p>")
 }
 
 export function parseMarkDown(message: string) {

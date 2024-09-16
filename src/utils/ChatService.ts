@@ -86,6 +86,16 @@ class ApiService {
       await this.loadConfig();
 
     this.socket.off('handle_chat', callback);
+  } 
+
+  async setListener(event: string, callback: (...args: any[]) => void) {
+
+    this.socket.on(event, callback);
+  }
+
+  async removeListener(event: string, callback: (...args: any[]) => void) {
+
+    this.socket.off(event, callback);
   }
   
   async sendQuestion(message: string) {
@@ -95,6 +105,13 @@ class ApiService {
     this.socket.emit('chat_message', {
       message
     });
+  }
+
+  async sendRaw(event: string, message: any) {
+    if(!this.BACKEND_URL)
+      await this.loadConfig();
+
+    this.socket.emit(event, message);
   }
   
   async uploadFile(data: any) {
