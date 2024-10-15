@@ -64,7 +64,10 @@ class ApiService {
     }
   }
 
-  onRecieveReply(callback: (...args: any[]) => void) {
+  async onRecieveReply(callback: (...args: any[]) => void) {
+    if(!this.socket){
+      await this.loadConfig();
+    }
     this.socket.on('handle_chat', callback);
   }
   

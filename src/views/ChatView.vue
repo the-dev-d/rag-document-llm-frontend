@@ -4,21 +4,20 @@
   import { nextTick, ref, watch } from 'vue'
   import socket, { dbManager } from '@/utils/ChatService'
   import { escapeParse } from '@/utils/ResponseParser'
-  import { useRouter } from 'vue-router'
+  import { useRoute, useRouter } from 'vue-router'
 
 
   const router = useRouter();
+  const route = useRoute();
 
-  if(dbManager.selected === "") {
-    router.replace("/");
-  }
+  
 
   const loading = ref(0);
   const prompt = ref('')
   const chatSection = ref<HTMLElement|null>(null);
   const chats = ref<Chat[]>([{
     role:'bot', 
-    message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \n\n Loaded Collection : " + dbManager.selected)
+    message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis.")
   }])
 
   socket.onRecieveReply((response: {result: string}) => {
