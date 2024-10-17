@@ -10,14 +10,14 @@
   const router = useRouter();
   const route = useRoute();
 
-  
+  console.log(route.params)
 
   const loading = ref(0);
   const prompt = ref('')
   const chatSection = ref<HTMLElement|null>(null);
   const chats = ref<Chat[]>([{
     role:'bot', 
-    message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis.")
+    message: escapeParse("Loaded Document is " + "")
   }])
 
   socket.onRecieveReply((response: {result: string}) => {
