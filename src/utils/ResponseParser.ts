@@ -14,7 +14,6 @@ export function makeInputBoxes(markup: string) {
 }
 
 export function parseMarkDown(message: string) {
-  message = message.replace(/\*\*[ ]+/g, "**");
   return marked.parse(message) as string;
 }
 

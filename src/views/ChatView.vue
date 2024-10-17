@@ -145,6 +145,8 @@
           role: 'bot',
           message: makeInputBoxes(parseMarkDown(response.result))
         })
+        console.log(chats.value[chats.value.length - 1].message)
+
       loading.value--;
     }catch(e) {
       console.log(e);
@@ -165,8 +167,15 @@
 
   watch(questions, async (val) => {
     nextTick(() => {
-        // initTooltips();
-        // setDynamicEvents();
+        if(chatSection.value)
+          chatSection.value.scrollTop = chatSection.value.scrollHeight;
+      })
+  }, {
+    deep: true,
+  })
+
+  watch(loading, async (val) => {
+    nextTick(() => {
         if(chatSection.value)
           chatSection.value.scrollTop = chatSection.value.scrollHeight;
       })
@@ -226,7 +235,7 @@
 
         chats.value[chats.value.length - 1].message = lastMessage.innerHTML.replace(
           /<p><strong>Incident Description<\/strong>:.*<\/p>/,
-          makeInputBoxes(newMatch[0])
+          ""
         );
         const dynamicInputs = document.querySelectorAll('input[data-dynamic-box]');
         dynamicInputs.forEach(input => {
@@ -288,8 +297,8 @@
 
       </div>
     </div>
-    <div class="w-full h-full max-h-full overflow-auto grid grid-rows-[1fr_auto] md:p-3 p-1 gap-2 @container">
-      <section ref="chatSection" class="grid content-start gap-5 scroll-smooth px-2">
+    <div ref="chatSection" class="w-full h-full max-h-full overflow-auto grid grid-rows-[1fr_auto] md:p-3 p-1 gap-2 @container">
+      <section  class="grid content-start gap-5 scroll-smooth px-2">
         <div
         v-for="(chat, index) in chats"
         v-bind:key="index"
@@ -312,7 +321,7 @@
             v-html="chat.role == 'bot' ? parseMarkDown(chat.message) : chat.message">
             </div>
             <div v-if="chat.role === 'bot' && index == chats.length -1 && questions.length === 0" class="ml-5 mt-3 flex gap-2 relative">
-              <button @click="handleAddMoreQuestions" class="w-fit p-2 px-4 rounded-md bg-dark-primary-medium text-white hover:bg-dark-primary-darker">Add more info</button>
+              <button :disabled="loading!=0" @click="handleAddMoreQuestions" class="w-fit p-2 px-4 rounded-md disabled:bg-gray-700 bg-dark-primary-medium text-white hover:bg-dark-primary-darker">More info</button>
             </div>
             <div class="ml-5 mt-3 flex gap-2 relative" v-if="chat.role == 'bot'">
               <button data-tooltip-target="tooltip-download" @click="handleDownload" class="w-fit px-4 py-1 rounded-md bg-dark-primary-medium text-white hover:bg-dark-primary-darker">
