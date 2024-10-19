@@ -215,8 +215,7 @@
   function regenerateReport() {
 
     const content = createFlattenedContent();
-    const match = content.match(/(?<=<p><strong>Incident Description<\/strong>:).*(?=<\/p>)/s);
-
+    const match = content.match(/(?<=<p><strong>Incident Description:<\/strong>).*(?=<\/p>)/s);
     if(match) {
       const incidentDescription = match[0];
       loading.value++;
@@ -234,8 +233,8 @@
         const lastMessage = document.getElementsByClassName('last-message')[0];
 
         chats.value[chats.value.length - 1].message = lastMessage.innerHTML.replace(
-          /<p><strong>Incident Description<\/strong>:.*<\/p>/,
-          ""
+          /<p><strong>Incident Description:<\/strong>.*<\/p>/,
+          newDescription
         );
         const dynamicInputs = document.querySelectorAll('input[data-dynamic-box]');
         dynamicInputs.forEach(input => {
