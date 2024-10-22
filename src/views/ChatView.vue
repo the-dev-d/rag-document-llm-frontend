@@ -51,6 +51,9 @@
     else 
       key = (source as HTMLElement).innerText as string;
 
+    key = key.replace("(", "\\(")
+    key = key.replace(")", "\\)")
+    
     const pageProcessing = () => {
       let pages;
       if(dbManager.selected?.file_name.endsWith(".pdf"))
@@ -65,7 +68,8 @@
           innerText = JSON.stringify((page as HTMLElement).innerText.replace(/[\n\s]+/g, "")) as string;
         else
           innerText = JSON.stringify((page as HTMLElement).innerText) as string;
-        console.log(innerText.match(key), key);
+
+        console.log(innerText.match(key), key, innerText);
         if(innerText.match(key)) {
           (page as HTMLElement).scrollIntoView();
         }
