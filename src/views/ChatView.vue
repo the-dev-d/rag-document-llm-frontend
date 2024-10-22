@@ -17,7 +17,7 @@
   const chatSection = ref<HTMLElement|null>(null);
   const chats = ref<Chat[]>([{
     role:'bot', 
-    message: escapeParse("Loaded Document is " + "")
+    message: escapeParse("Loaded Document is <b>" + route.query.name + "</b>")
   }])
 
   socket.onRecieveReply((response: {result: string}) => {
