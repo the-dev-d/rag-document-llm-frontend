@@ -53,6 +53,10 @@
 
     key = key.replace("(", "\\(")
     key = key.replace(")", "\\)")
+
+    let highlight = (source as HTMLElement).innerText as string;
+    let indexOfHyphen = highlight.indexOf('-');
+    highlight = (indexOfHyphen !== -1) ? highlight.substring(indexOfHyphen + 1).trim() : highlight;
     
     const pageProcessing = () => {
       let pages;
@@ -61,17 +65,25 @@
       else
         pages = document.getElementsByClassName('docx-wrapper')[0].childNodes;
 
-      for(const page of pages) {
+      for(let page of pages as NodeListOf<HTMLElement>) {
         
+        page = page as HTMLElement;
         let innerText: string = "";
-        if(dbManager.selected?.file_name.endsWith(".pdf"))
-          innerText = JSON.stringify((page as HTMLElement).innerText.replace(/[\n\s]+/g, "")) as string;
-        else
-          innerText = JSON.stringify((page as HTMLElement).innerText) as string;
 
-        console.log(innerText.match(key), key, innerText);
-        if(innerText.match(key)) {
-          (page as HTMLElement).scrollIntoView();
+        if(dbManager.selected?.file_name.endsWith(".pdf")) {
+          innerText = page.innerText.replace(/\s+/g, "");
+          if(innerText.match(key)) {
+            page.scrollIntoView()
+          }
+        }
+        else {
+          page.innerHTML = page.innerHTML.replace(/<span class=['"]highlight['"]>(.*?)<\/span>/g, '$1')
+          page.innerHTML = page.innerHTML.replace(highlight, "<span class='highlight'>" + highlight + "</span>")
+        
+          const highlightSpan = document.getElementsByClassName('highlight')[0];
+          if(highlightSpan) {
+            highlightSpan.scrollIntoView();
+          }
         }
       }
     }

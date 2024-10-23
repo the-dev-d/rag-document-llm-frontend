@@ -3,7 +3,9 @@
     import { onMounted, ref } from 'vue';
     import chatService, { dbManager } from '@/utils/ChatService'
 
-    const props = defineProps(['file']);
+    const props = defineProps({
+        highlight: String
+    });
     
     let blob = ref<Blob|null>(null);
     
@@ -15,11 +17,14 @@
     onMounted(async () => {
         await makeFileBlob();
         console.log(blob.value);
-        const container = document.getElementById('container');
-        if(!container)
+        let container = document.getElementById('container');
+        
+        if(!container) {
+            console.error("Container not found")
             return;
-
-        renderAsync(blob.value, container);
+        }
+        await renderAsync(blob.value, container);
+        
     })
 </script>
 
@@ -28,3 +33,10 @@
         
     </div>
 </template>
+
+<style>
+    .highlight {
+        background-color: yellow;
+        color: black;
+    }
+</style>
