@@ -2,7 +2,7 @@
   import type { Chat } from '@/types/type'
   import { sidebar } from '@/utils/GlobalStates'
   import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-  import socket, { dbManager } from '@/utils/ChatService'
+  import socket, { createRegexPatternForLetters, dbManager } from '@/utils/ChatService'
   import { escapeParse, parseJSONToTable } from '@/utils/ResponseParser'
   import { useRouter } from 'vue-router'
   import PDFViewer from '@/components/PDFViewer.vue'
@@ -10,6 +10,7 @@
   import { Dropdown, initFlowbite } from 'flowbite'
   import ExcelJS from 'exceljs'
   import { saveAs } from 'file-saver'
+import { match } from 'assert'
 
   const router = useRouter();
 
@@ -71,9 +72,37 @@
         let innerText: string = "";
 
         if(dbManager.selected?.file_name.endsWith(".pdf")) {
+
+          const canvas = page.getElementsByTagName('canvas')[0];
+          page.innerHTML = page.innerHTML.replace(/background-color: yellow;/g, "")
+          const newCanvas = page.getElementsByTagName('canvas')[0];
+          const context = newCanvas.getContext("2d");
+          context?.drawImage(canvas, 0, 0);
+
           innerText = page.innerText.replace(/\s+/g, "");
           if(innerText.match(key)) {
+            
             page.scrollIntoView()
+            const pattern = createRegexPatternForLetters(highlight);
+
+            const canvas = page.getElementsByTagName('canvas')[0];
+            const matchExp = page.innerHTML.match(pattern);
+
+            if(!matchExp)
+              return;
+
+            const selected = page.innerHTML.match(pattern);
+            if(!selected)
+              return;
+
+            const highlighed = selected[0].replace(/(<span\b[^>]*style=\"[^\"]*?)([^\"]*?)\"/g,'$1$2 background-color: yellow;\"');
+            if(matchExp.index)
+              page.innerHTML = page.innerHTML.slice(0, matchExp.index) + highlighed + page.innerHTML.slice(matchExp.index + matchExp[0].length);
+
+            const newCanvas = page.getElementsByTagName('canvas')[0];
+            const context = newCanvas.getContext("2d");
+
+            context?.drawImage(canvas, 0, 0);
           }
         }
         else {

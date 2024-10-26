@@ -21,8 +21,8 @@
 </script>
 
 <template>
-  <div>
-    <div class="max-w-[90svw]" data-page v-for="page in pages" :id="'page-' + page" :key="page">
+  <div class="bg-slate-300">
+    <div class="max-w-[90svw] mb-2" data-page v-for="page in pages" :id="'page-' + page" :key="page">
       <VuePDF
       text-layer
       :height
@@ -32,3 +32,16 @@
   </div>
   </div>
 </template>
+
+<style>
+.textLayer :is(span,br) {
+  color: black;
+  background-color: white;
+}
+
+.highlight {
+  background-color: yellow;
+  color: black;
+}
+
+</style>

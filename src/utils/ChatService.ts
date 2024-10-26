@@ -109,6 +109,15 @@ class ApiService {
   }
 }
 
+export function createRegexPatternForLetters(input: string): string {
+  const escapedInput = input.replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+  const letters = escapedInput.match(/\\?.|./g) || [];
+  console.log(letters)
+  const regexPattern = letters.join('(?:<[^>]+>|(?: ))*');
+  return `(?:<[^\/>]+>|(?: ))${regexPattern}(?:</[^>]+>|(?: ))*`;
+}
+
+
 const apiServiceInstance = new ApiService();
 export default apiServiceInstance;
 

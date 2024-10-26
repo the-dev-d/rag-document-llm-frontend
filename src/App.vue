@@ -3,7 +3,6 @@
   import { RouterView } from 'vue-router';
   import socket from '@/utils/ChatService'
 
-
   const loadConfig = async () => {
     await socket.loadConfig();
   }
