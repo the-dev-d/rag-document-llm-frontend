@@ -21,8 +21,8 @@
 </script>
 
 <template>
-  <div class="bg-slate-300">
-    <div class="max-w-[90svw] mb-2" data-page v-for="page in pages" :id="'page-' + page" :key="page">
+  <div class="grid place-items-center">
+    <div class="w-fit mb-2" data-page v-for="page in pages" :id="'page-' + page" :key="page">
       <VuePDF
       text-layer
       :height

@@ -29,7 +29,7 @@ import { match } from 'assert'
   const chatSection = ref<HTMLElement|null>(null);
   const chats = ref<Chat[]>([{
     role:'bot',
-    message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \n\n Loaded Collection : " + dbManager.selected?.database_name)
+    message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \n\n Loaded Collection : " + dbManager.selected?.file_name)
   }])
 
   const riskList = ['All Risks', 'Internal Fraud', 'External Fraud', 'Employment Practices and Workplace Safety', 'Clients, Products, and Business Practice', 'Damage to Physical Assets', 'Business Disruption and Systems Failures', 'Execution, Delivery, and Process Management']
@@ -208,7 +208,7 @@ import { match } from 'assert'
 <template>
   <div class="grid w-full h-full relative place-items-center" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
     <div class="w-full h-full grid p-1 md:p-3 gap-2">
-      <section ref="chatSection" class="grid content-start max-h-[88vh] h-full gap-5 overflow-y-auto scroll-smooth px-2">
+      <section ref="chatSection" class="grid content-start max-h-[96vh] h-full gap-5 overflow-y-auto scroll-smooth px-2">
         <div
         v-for="(chat, index) in chats"
         v-bind:key="index"
@@ -277,13 +277,13 @@ import { match } from 'assert'
     </div>
     <div
     :class="{'hidden': sidebar.status.value, 'grid': !sidebar.status.value}"
-      class="w-full grid-rows-[auto_1fr] h-full max-w-[100svw] bg-slate-50 absolute xl:relative max-h-[88svh]"
+      class="w-full grid-rows-[auto_1fr] h-full max-h-[95svh]  max-w-[100svw] bg-slate-200 p-2 absolute xl:relative"
     >
-      <div class="h-full mx-2">
+      <div class="h-full px-2  bg-white border-b-2">
         <button @click="() => sidebar.status.value = true" type="button" class="m-3 text-white bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Collapse </button>
       </div>      
       <div
-        class="w-full max-w-full h-full overflow-y-auto grid content-start scroll-smooth gap-1 bg-slate-100 justify-center">
+        class="w-full max-w-full h-full overflow-y-auto grid content-start scroll-smooth gap-1justify-center mt-1">
         <PDFViewer v-if="dbManager.selected?.file_name.endsWith('.pdf')"></PDFViewer>
         <DocxViewer v-if="dbManager.selected?.file_name.endsWith('.docx')"></DocxViewer>
       </div> 

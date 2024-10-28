@@ -1,42 +1,68 @@
 <script setup lang="ts">
     import socket, { dbManager } from '@/utils/ChatService';
     import { ref } from 'vue';
-    import { useRouter } from 'vue-router';
+    import { useRoute, useRouter } from 'vue-router';
     const router = useRouter();
-    const selection = ref<number|null>(null);
-    const disabled = ref(false);
+    const route = useRoute();
+
+    const {name} = route.query;
+    const loading = ref(false);
 
     function handleGoClick() {
-        
-        if(selection.value===null)
+        if(!name || typeof(name)!=="string") {
             return;
-        
-        dbManager.setSelected(dbManager.options.value[selection.value]);
+        }
+        dbManager.setSelected({file_name:name});
         router.push("/chat");
     }
 
-    function handleChange() {
-        if(selection.value === null) {
+    async function handleChange() {
+        if(!name || typeof(name)!=="string") {
             return;
         }
-        disabled.value = true;
-        dbManager.setSelected(dbManager.options.value[selection.value]);
-        socket.sendQuestion("All Risks");
-        
+        loading.value = true;
+
+        dbManager.setSelected({
+            file_name: name
+        });
+        try {
+            const res = await socket.create_db(name);
+        } catch (error) {
+            loading.value = false;
+            return;
+        }
         const handleRouteChange = (res:any) => {
             if(res.includes("Loading"))
                 return;
-            
-            disabled.value = false;
-        }
 
+            socket.offRecieveReply(handleRouteChange)
+            loading.value = false;
+            handleGoClick();
+            
+        }
         socket.onRecieveReply(handleRouteChange);
+        socket.sendQuestion("All Risks");
     }
+
+    handleChange()
+
 </script>
 <template>
     <div class="w-full h-full grid place-items-center">
-        <div class="bg-white p-10 w-11/12 md:w-1/3 aspect-[2/1] shadow-md rounded-md grid place-items-center content-center gap-6">
-            <div class="gap-6 w-full">
+        <div class="bg-white p-10 w-11/12 md:w-1/2 aspect-[2/1] shadow-md rounded-md grid place-items-center content-center gap-6">
+            <div v-if="!name">
+                Please use 'name' query parameter to specify document
+            </div>
+            <div>
+                <div>{{ name }}</div>
+            </div>
+            <div v-if="loading" class="grid place-items-center gap-2">
+                <div class="grid place-items-center gap-6">
+                    <span class="loader"></span>
+                    <p>Please wait while we create your database.</p>
+                </div>
+            </div>
+            <!-- <div class="gap-6 w-full">
                 <label for="countries" class="block text-nowrap mb-2 text-sm font-medium text-gray-900 dark:text-white">Select</label>
                 <select @change="handleChange" v-model="selection"  id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     <option :value="null">Select DB</option>
@@ -54,7 +80,63 @@
                 <span v-else>
                     Go
                 </span>
-            </button>
+            </button> -->
         </div>
     </div>
 </template>
+
+<style scoped>
+.loader {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  border: 3px solid;
+  border-color: #086375 #086375 transparent transparent;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+.loader::after,
+.loader::before {
+  content: '';  
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  border: 3px solid;
+  border-color: transparent transparent #2a9c97 #28918b;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: rotationBack 0.5s linear infinite;
+  transform-origin: center center;
+}
+.loader::before {
+  width: 32px;
+  height: 32px;
+  border-color: #FFF #FFF transparent transparent;
+  animation: rotation 1.5s linear infinite;
+}
+    
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+@keyframes rotationBack {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+</style>
