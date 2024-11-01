@@ -50,7 +50,7 @@ class ApiService {
         reconnection: true,
         reconnectionAttempts: 3,
         reconnectionDelay: 1000,
-        //transports: ['websocket'],
+        transports: ['websocket'],
         secure: true
       });
     
@@ -99,14 +99,17 @@ class ApiService {
     });
   }
 
-  async create_db(file_name: string) {
+  async create_db(filename: string) {
     if(!this.BACKEND_URL)
       await this.loadConfig();
 
+    if(!filename.endsWith('.pdf'))
+      filename = filename + ".pdf"
+    
     const p = new Promise((resolve, reject) => {
       
       const dbCreationHandler = (data:string|any) => {
-        if(data === `4 Database for ${file_name} created successfully.`) {
+        if(data === `4 Database ${filename} created successfully.`) {
           resolve(data);
           this._socket.off("handle_chat", dbCreationHandler);
           console.log("Database created successfully");
@@ -117,7 +120,7 @@ class ApiService {
       }
       this._socket.on("handle_chat", dbCreationHandler);
       this._socket.emit('chat_message', {
-        file_name
+        filename
       });
     })
     const data = await p;

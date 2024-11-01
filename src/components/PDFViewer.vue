@@ -5,7 +5,11 @@
   import { onMounted, ref } from 'vue';
 
 
-  const fileURL = chatService.backend + "/uploads/" + dbManager.selected?.file_name.replace(/ /g, "%20").trim();
+  
+  let fileURL = chatService.backend + "/files/" + dbManager.selected?.file_name.replace(/ /g, "%20").trim();
+  if(!fileURL.endsWith(".pdf"))
+    fileURL = fileURL + ".pdf"
+  
   const { pdf, pages } = usePDF(fileURL)
 
   let height = 0;

@@ -1,14 +1,9 @@
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 
-const sideBarCollapsed = ref(true)
-
-const watchControl = watch(sideBarCollapsed, (v) => {
-  localStorage.setItem('sideBarCollapse', v ? 'true' : 'false')
-})
+const sideBarCollapsed = ref(false)
 
 export const sidebar = {
   status: sideBarCollapsed,
-  watchControl
 }
 
 export const captchaVerified = false;

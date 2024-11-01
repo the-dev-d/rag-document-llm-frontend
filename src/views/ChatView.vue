@@ -13,12 +13,11 @@
 import { match } from 'assert'
 
   const router = useRouter();
+  const prompt = ref('')
+
 
   onMounted(() => {
     initFlowbite();    
-  })
-  onUnmounted(() => {
-    sidebar.status.value = true;
   })
 
   if(dbManager.selected === null) {
@@ -32,15 +31,23 @@ import { match } from 'assert'
     message: escapeParse("Hello! Welcome to the world of MagpieAI. I am an expert in document analysis. \n\n Loaded Collection : " + dbManager.selected?.file_name)
   }])
 
-  const riskList = ['All Risks', 'Internal Fraud', 'External Fraud', 'Employment Practices and Workplace Safety', 'Clients, Products, and Business Practice', 'Damage to Physical Assets', 'Business Disruption and Systems Failures', 'Execution, Delivery, and Process Management']
+  // const riskList = ['All Risks', 'Internal Fraud', 'External Fraud', 'Employment Practices and Workplace Safety', 'Clients, Products, and Business Practice', 'Damage to Physical Assets', 'Business Disruption and Systems Failures', 'Execution, Delivery, and Process Management']
 
   function createSourceClickListeners() {
     const elements = document.querySelectorAll('[data-source="true"]');
     elements.forEach(el => {
+      console.log(el)
       el.addEventListener('click', (e) => {
         handleSourceClick(e.target);
       })
     })
+  }
+
+  async function handleClicks(e: KeyboardEvent) {
+    if (!e.shiftKey && e.code === 'Enter') {
+      sendCurrentPrompt(prompt.value)
+      prompt.value = ''
+    }
   }
 
   function handleSourceClick(source: EventTarget|null) {
@@ -117,8 +124,8 @@ import { match } from 'assert'
       }
     }
 
-    if(sidebar.status.value) {
-      sidebar.status.value = false;
+    if(!sidebar.status.value) {
+      sidebar.status.value = true;
       nextTick(() => {
         setTimeout(pageProcessing, 1000)
       })
@@ -128,22 +135,34 @@ import { match } from 'assert'
   }
 
   socket.onRecieveReply((response) => {
-      if(response === "Loading.." || response === "Loading...")
+      if(response === "Loading" || response === "Loading...")
         return;
     
-      try {
+      try {        
+        // const parsed = JSON.parse(response);
+        
+        const {result} = response as {result:string};
+        const match = result.match(/\*?\*?Answer:\*?\*?\s(.*)[.\n]*\*?\*?Source:\*?\*?(.*)/)
+        let final = response.result;
 
-        const parsed = JSON.parse(response);
-        let final: string|null = null;
+        console.log(result,match)
+        if(match) {
+          const answer = match[1];
+          const source = match[2];
+          const sourceParsed = `<br><br> Source: <span data-source="true"> ${source} </span>`;
+          const response = answer + sourceParsed;
+          final = response;
+        }
 
-        final = parseJSONToTable(parsed);
-        if(final)
-          chats.value.push({
-            role: 'bot',
-            message: final
-          })
+        console.log(final)
+        // final = parseJSONToTable(parsed);
+        chats.value.push({
+          role: 'bot',
+          message: final
+        })
         loading.value--;
-        nextTick(createSourceClickListeners)
+        console.log(loading.value)
+        // nextTick(createSourceClickListeners)
       }catch(e) {
         console.log(e);
       }
@@ -156,12 +175,6 @@ import { match } from 'assert'
       return;
     }
 
-    const target = document.getElementById('dropdown');
-    const trigger = document.getElementById('dropdownDefaultButton');
-
-    const dropdown = new Dropdown(target, trigger);
-    dropdown.hide();
-
     chats.value.push({
       role: 'user',
       message: value
@@ -171,43 +184,44 @@ import { match } from 'assert'
 
   }
 
-  function makeDownload(content: string) {
-    const div = document.createElement("div");
-    div.innerHTML = content;
+  // function makeDownload(content: string) {
+  //   const div = document.createElement("div");
+  //   div.innerHTML = content;
 
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('My Sheet');
+  //   const workbook = new ExcelJS.Workbook();
+  //   const sheet = workbook.addWorksheet('My Sheet');
 
-    const tableBody = div.childNodes[0].childNodes[0];
-    for(const tableRow of tableBody.childNodes) {
-      const rowEl = [];
-      for(const tableCell of tableRow.childNodes)  {
-        rowEl.push(tableCell.textContent);
-      }
-      sheet.addRow(rowEl);
-    }
+  //   const tableBody = div.childNodes[0].childNodes[0];
+  //   for(const tableRow of tableBody.childNodes) {
+  //     const rowEl = [];
+  //     for(const tableCell of tableRow.childNodes)  {
+  //       rowEl.push(tableCell.textContent);
+  //     }
+  //     sheet.addRow(rowEl);
+  //   }
 
-    workbook.xlsx.writeBuffer()
-      .then((buffer) => {
-        saveAs(new Blob([buffer], {type: 'application/octet-stream'}),'download.xlsx')
-      })
-  }
+  //   workbook.xlsx.writeBuffer()
+  //     .then((buffer) => {
+  //       saveAs(new Blob([buffer], {type: 'application/octet-stream'}),'download.xlsx')
+  //     })
+  // }
+
 
   watch(chats, async (val) => {
     nextTick(() => {
         if(chatSection.value)
           chatSection.value.scrollTop = chatSection.value.scrollHeight;
         initFlowbite();
+        createSourceClickListeners();
       })
   }, {
     deep: true,
   })
-
 </script>
 
 <template>
-  <div class="grid w-full h-full relative place-items-center" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
-    <div class="w-full h-full grid p-1 md:p-3 gap-2">
+  <div class="grid w-full h-full relative place-items-center" :class="{ 'grid-cols-[1fr_auto]': sidebar.status.value }">
+    <div class="w-full h-full grid p-1 md:p-3 gap-2 grid-rows-[1fr_auto]">
       <section ref="chatSection" class="grid content-start max-h-[96vh] h-full gap-5 overflow-y-auto scroll-smooth px-2">
         <div
         v-for="(chat, index) in chats"
@@ -235,8 +249,7 @@ import { match } from 'assert'
           <i class="fa-solid fa-user"></i>
         </div>
         <div class="col-start-2 p-3">
-          
-        <div v-if="chat.role == 'bot' && (index === chats.length-1 || index === chats.length-2)" class="w-full gap-3 flex md:flex items-center justify-start">
+        <!-- <div v-if="chat.role == 'bot' && (index === chats.length-1 || index === chats.length-2)" class="w-full gap-3 flex md:flex items-center justify-start">
           <div id="dropdown-wrappper">
             <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="text-white bg-bubble-bot/70 hover:bg-bubble-bot/80  focus:outline-none font-medium rounded-lg text-xs md:text-sm px-5 py-2.5 text-center inline-flex items-center" type="button"> Categories of Operational Risks <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
@@ -257,7 +270,7 @@ import { match } from 'assert'
               <i class="fa-solid fa-download"></i>
             </button>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -274,13 +287,27 @@ import { match } from 'assert'
         </div>
 
       </section>
-    </div>
+      <div>
+        <section class="box-border flex items-center justify-center h-20 gap-3">
+        <textarea
+          v-model="prompt"
+          v-on:keyup="handleClicks"
+          id="message"
+          class="box-border flex-1 p-2 text-sm text-gray-900 bg-transparent border-2 rounded-lg resize-none bg-gray-50 border-slate-400 focus:ring-teal-500 focus:border-blue-500 backdrop-brightness-150 dark:border-teal-600 h-full dark:placeholder-gray-400 dark:text-white focus:outline-none dark:focus:border-teal-400 focus:border-2"
+          placeholder="Start typing..."
+        ></textarea>
+        <button v-on:click="() => {sendCurrentPrompt(prompt); prompt = ''}" type="button" class="grid text-xl font-medium text-center text-dark-primary-darker border border-dark-primary-darker rounded-sm h-fit w-fit p-4 outline-none place-items-center hover:bg-dark-primary-medium hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:text-teal-300 dark:border-teal-500 dark:hover:text-white dark:focus:ring-teal-800 dark:hover:bg-teal-500">
+          <i class="fas fa-paper-plane"></i>
+        </button>          
+      </section>
+      </div>
+    </div>  
     <div
-    :class="{'hidden': sidebar.status.value, 'grid': !sidebar.status.value}"
+    :class="{'hidden': !sidebar.status.value, 'grid': sidebar.status.value}"
       class="w-full grid-rows-[auto_1fr] h-full max-h-[95svh]  max-w-[100svw] bg-slate-200 p-2 absolute xl:relative"
     >
       <div class="h-full px-2  bg-white border-b-2">
-        <button @click="() => sidebar.status.value = true" type="button" class="m-3 text-white bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Collapse </button>
+        <button @click="() => sidebar.status.value = false" type="button" class="m-3 text-white bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Collapse </button>
       </div>      
       <div
         class="w-full max-w-full h-full overflow-y-auto grid content-start scroll-smooth gap-1justify-center mt-1">
@@ -292,6 +319,10 @@ import { match } from 'assert'
 </template>
 
 <style>
+span[data-source] {
+  text-decoration: underline;
+  cursor: pointer;
+}
 td, th {
   border: 1px solid white;
   padding: 0.5rem;

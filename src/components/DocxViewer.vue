@@ -10,7 +10,7 @@
     let blob = ref<Blob|null>(null);
     
     async function makeFileBlob() {
-        const res = await fetch(chatService.backend + "/uploads/" + dbManager.selected?.file_name);
+        const res = await fetch(chatService.backend + "/files/" + dbManager.selected?.file_name);
         blob.value = await res.blob();
     }
 
