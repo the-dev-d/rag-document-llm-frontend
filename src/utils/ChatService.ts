@@ -103,6 +103,9 @@ class ApiService {
     if(!this.BACKEND_URL)
       await this.loadConfig();
 
+    if(!file_name.endsWith(".pdf"))
+      file_name = file_name + ".pdf";
+    
     const p = new Promise((resolve, reject) => {
       
       const dbCreationHandler = (data:string|any) => {

@@ -56,11 +56,13 @@
             <div>
                 <div>{{ name }}</div>
             </div>
-            <div v-if="loading" class="grid place-items-center gap-2">
-                <div class="grid place-items-center gap-6">
+            <div v-if="loading" class="grid relative place-items-center gap-2 ">
+                <div class="grid relative place-items-center gap-6 z-10">
+                    <img class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[8rem]" src="@/assets/logo.png" alt="">
                     <span class="loader"></span>
-                    <p>Please wait while we create your database.</p>
                 </div>
+                <p class="mt-6">Please wait while we create your database.</p>
+
             </div>
             <!-- <div class="gap-6 w-full">
                 <label for="countries" class="block text-nowrap mb-2 text-sm font-medium text-gray-900 dark:text-white">Select</label>
@@ -87,8 +89,9 @@
 
 <style scoped>
 .loader {
-  width: 48px;
-  height: 48px;
+    scale: 125%;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   display: inline-block;
   position: relative;
@@ -109,16 +112,16 @@
   margin: auto;
   border: 3px solid;
   border-color: transparent transparent #2a9c97 #28918b;
-  width: 40px;
-  height: 40px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   box-sizing: border-box;
   animation: rotationBack 0.5s linear infinite;
   transform-origin: center center;
 }
 .loader::before {
-  width: 32px;
-  height: 32px;
+  width: 85px;
+  height: 85px;
   border-color: #FFF #FFF transparent transparent;
   animation: rotation 1.5s linear infinite;
 }
