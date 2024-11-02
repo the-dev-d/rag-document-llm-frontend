@@ -78,7 +78,7 @@ import { match } from 'assert'
         page = page as HTMLElement;
         let innerText: string = "";
 
-        if(dbManager.selected?.file_name.endsWith(".pdf")) {
+        // if(dbManager.selected?.file_name.endsWith(".pdf")) {
 
           const canvas = page.getElementsByTagName('canvas')[0];
           page.innerHTML = page.innerHTML.replace(/background-color: yellow;/g, "")
@@ -111,16 +111,16 @@ import { match } from 'assert'
 
             context?.drawImage(canvas, 0, 0);
           }
-        }
-        else {
-          page.innerHTML = page.innerHTML.replace(/<span class=['"]highlight['"]>(.*?)<\/span>/g, '$1')
-          page.innerHTML = page.innerHTML.replace(highlight, "<span class='highlight'>" + highlight + "</span>")
+        // }
+        // else {
+        //   page.innerHTML = page.innerHTML.replace(/<span class=['"]highlight['"]>(.*?)<\/span>/g, '$1')
+        //   page.innerHTML = page.innerHTML.replace(highlight, "<span class='highlight'>" + highlight + "</span>")
         
-          const highlightSpan = document.getElementsByClassName('highlight')[0];
-          if(highlightSpan) {
-            highlightSpan.scrollIntoView();
-          }
-        }
+        //   const highlightSpan = document.getElementsByClassName('highlight')[0];
+        //   if(highlightSpan) {
+        //     highlightSpan.scrollIntoView();
+        //   }
+        // }
       }
     }
 
@@ -311,8 +311,8 @@ import { match } from 'assert'
       </div>      
       <div
         class="w-full max-w-full h-full overflow-y-auto grid content-start scroll-smooth gap-1justify-center mt-1">
-        <PDFViewer v-if="dbManager.selected?.file_name.endsWith('.pdf')"></PDFViewer>
-        <DocxViewer v-if="dbManager.selected?.file_name.endsWith('.docx')"></DocxViewer>
+        <PDFViewer></PDFViewer>
+        <!-- <DocxViewer v-if="dbManager.selected?.file_name.endsWith('.docx')"></DocxViewer> -->
       </div> 
     </div>
   </div>
