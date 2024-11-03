@@ -62,7 +62,7 @@
                     <div class="grid relative place-items-center gap-6 z-10">
                         <span class="loader"></span>
                     </div>
-                    <p class="text-center">Please wait while we create your database.</p>
+                    <p class="text-center">Please wait till we build your custom magpie mini bot</p>
 
                 </div>
             </div>
