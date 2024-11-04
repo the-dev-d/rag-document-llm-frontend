@@ -109,7 +109,7 @@ class ApiService {
     const p = new Promise((resolve, reject) => {
       
       const dbCreationHandler = (data:string|any) => {
-        if(data === `4 Database ${filename} created successfully.`) {
+        if(data === "4 In-memory FAISS Database created successfully.") {
           resolve(data);
           this._socket.off("handle_chat", dbCreationHandler);
           console.log("Database created successfully");
