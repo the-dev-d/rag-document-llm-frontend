@@ -3,7 +3,7 @@
   import { sidebar } from '@/utils/GlobalStates'
   import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
   import socket, { createRegexPatternForLetters, dbManager } from '@/utils/ChatService'
-  import { escapeParse, parseJSONToTable } from '@/utils/ResponseParser'
+  import { escapeParse, getSelectableTextContent, parseJSONToTable } from '@/utils/ResponseParser'
   import { useRouter } from 'vue-router'
   import PDFViewer from '@/components/PDFViewer.vue'
   import DocxViewer from '@/components/DocxViewer.vue';
@@ -56,16 +56,20 @@ import { match } from 'assert'
     key = key.replace(")", "\\)")
 
     let highlight = (source as HTMLElement).innerText as string;
-    let indexOfHyphen = highlight.indexOf('-');
-    highlight = (indexOfHyphen !== -1) ? highlight.substring(indexOfHyphen + 1).trim() : highlight;
+    // let indexOfHyphen = highlight.indexOf('-');
+    // highlight = (indexOfHyphen !== -1) ? highlight.substring(indexOfHyphen + 1).trim() : highlight;
+
+    if(highlight.startsWith('"')){
+      highlight = highlight.substring(1)
+    if(highlight.endsWith('"')) {
+      highlight = highlight.substring(0, highlight.length -1)
+    }
+    }
     
     const pageProcessing = () => {
       let pages;
-      if(dbManager.selected?.file_name.endsWith(".pdf"))
-        pages = document.querySelectorAll('[data-page]')
-      else
-        pages = document.getElementsByClassName('docx-wrapper')[0].childNodes;
 
+      pages = document.querySelectorAll('[data-page]')
       for(let page of pages as NodeListOf<HTMLElement>) {
         
         page = page as HTMLElement;
@@ -80,10 +84,13 @@ import { match } from 'assert'
           context?.drawImage(canvas, 0, 0);
 
           innerText = page.innerText.replace(/\s+/g, "");
-          if(innerText.match(key)) {
+          const selectableText = getSelectableTextContent(page);
+
+          if(selectableText.replace(/\s/g, "").includes(highlight.replace(/\s/g,""))) {
             
             page.scrollIntoView()
             const pattern = createRegexPatternForLetters(highlight);
+            console.log(pattern);
 
             const canvas = page.getElementsByTagName('canvas')[0];
             const matchExp = page.innerHTML.match(pattern);

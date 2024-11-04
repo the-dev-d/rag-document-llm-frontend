@@ -50,7 +50,7 @@ class ApiService {
         reconnection: true,
         reconnectionAttempts: 3,
         reconnectionDelay: 1000,
-        //transports: ['websocket'],
+        transports: ['websocket'],
         secure: true
       });
     
@@ -99,12 +99,12 @@ class ApiService {
     });
   }
 
-  async create_db(file_name: string) {
+  async create_db(filename: string) {
     if(!this.BACKEND_URL)
       await this.loadConfig();
 
-    if(!file_name.endsWith(".pdf"))
-      file_name = file_name + ".pdf";
+    if(!filename.endsWith('.pdf'))
+      filename = filename + ".pdf"
     
     const p = new Promise((resolve, reject) => {
       
@@ -120,7 +120,7 @@ class ApiService {
       }
       this._socket.on("handle_chat", dbCreationHandler);
       this._socket.emit('chat_message', {
-        file_name
+        filename
       });
     })
     const data = await p;
@@ -144,8 +144,7 @@ export function createRegexPatternForLetters(input: string): string {
   const letters = escapedInput.match(/\\?.|./g) || [];
   console.log(letters)
   const regexPattern = letters.join('(?:<[^>]+>|(?: ))*');
-  return `(?:<[^\/>]+>|(?: ))${regexPattern}(?:</[^    const selection = ref<number|null>(null);
->]+>|(?: ))*`;
+  return `(?:<[^\/>]+>|(?: ))${regexPattern}(?:</[^>]+>|(?: ))*`;
 }
 
 
