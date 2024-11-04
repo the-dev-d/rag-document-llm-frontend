@@ -3,7 +3,7 @@
   import { sidebar } from '@/utils/GlobalStates'
   import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
   import socket, { createRegexPatternForLetters, dbManager } from '@/utils/ChatService'
-  import { escapeParse, parseJSONToTable } from '@/utils/ResponseParser'
+  import { escapeParse, getSelectableTextContent, parseJSONToTable } from '@/utils/ResponseParser'
   import { useRouter } from 'vue-router'
   import PDFViewer from '@/components/PDFViewer.vue'
   import DocxViewer from '@/components/DocxViewer.vue';
@@ -36,7 +36,6 @@ import { match } from 'assert'
   function createSourceClickListeners() {
     const elements = document.querySelectorAll('[data-source="true"]');
     elements.forEach(el => {
-      console.log(el)
       el.addEventListener('click', (e) => {
         handleSourceClick(e.target);
       })
@@ -54,24 +53,27 @@ import { match } from 'assert'
     if(!source) return;
 
     let key: string = "" 
-    if(dbManager.selected?.file_name.endsWith(".pdf"))
-      key = (source as HTMLElement).innerText.replace(/[\n\s]/g, "") as string;
-    else 
-      key = (source as HTMLElement).innerText as string;
+
+    key = (source as HTMLElement).innerText.replace(/[\n\s]/g, "") as string;
+
 
     key = key.replace("(", "\\(")
     key = key.replace(")", "\\)")
 
     let highlight = (source as HTMLElement).innerText as string;
-    let indexOfHyphen = highlight.indexOf('-');
-    highlight = (indexOfHyphen !== -1) ? highlight.substring(indexOfHyphen + 1).trim() : highlight;
+    if(highlight.startsWith('"')) {
+      highlight = highlight.substring(1);
+    }
+    if(highlight.endsWith('"')) {
+      highlight = highlight.substring(0, highlight.length -1)
+    }
+    // let indexOfHyphen = highlight.indexOf('-');
+    // highlight = (indexOfHyphen !== -1) ? highlight.substring(indexOfHyphen + 1).trim() : highlight;
     
     const pageProcessing = () => {
       let pages;
-      if(dbManager.selected?.file_name.endsWith(".pdf"))
-        pages = document.querySelectorAll('[data-page]')
-      else
-        pages = document.getElementsByClassName('docx-wrapper')[0].childNodes;
+  
+      pages = document.querySelectorAll('[data-page]')
 
       for(let page of pages as NodeListOf<HTMLElement>) {
         
@@ -86,11 +88,18 @@ import { match } from 'assert'
           const context = newCanvas.getContext("2d");
           context?.drawImage(canvas, 0, 0);
 
-          innerText = page.innerText.replace(/\s+/g, "");
+          innerText = getSelectableTextContent(page).replace(/\s/g, "");
+          if(key.startsWith('"')) {
+            key = key.substring(1);
+          }
+          if(key.endsWith('"')) {
+            key = key.substring(0, key.length -1)
+          }
           if(innerText.match(key)) {
             
             page.scrollIntoView()
             const pattern = createRegexPatternForLetters(highlight);
+            console.log(pattern);
 
             const canvas = page.getElementsByTagName('canvas')[0];
             const matchExp = page.innerHTML.match(pattern);
@@ -145,7 +154,6 @@ import { match } from 'assert'
         const match = result.match(/\*?\*?Answer:\*?\*?\s(.*)[.\n]*\*?\*?Source:\*?\*?(.*)/)
         let final = response.result;
 
-        console.log(result,match)
         if(match) {
           const answer = match[1];
           const source = match[2];
@@ -154,14 +162,12 @@ import { match } from 'assert'
           final = response;
         }
 
-        console.log(final)
         // final = parseJSONToTable(parsed);
         chats.value.push({
           role: 'bot',
           message: final
         })
         loading.value--;
-        console.log(loading.value)
         // nextTick(createSourceClickListeners)
       }catch(e) {
         console.log(e);

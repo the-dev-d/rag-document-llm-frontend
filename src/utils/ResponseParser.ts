@@ -43,3 +43,38 @@ export function parseJSONToTable(data: any[]) {
   div.appendChild(tableDom);
   return div.innerHTML;
 }
+export function getSelectableTextContent(div:HTMLElement) {
+  if (!(div instanceof HTMLElement)) {
+      throw new Error("Please provide a valid HTML element.");
+  }
+
+  let selectableText = "";
+
+  function traverse(node:any) {
+      // Only process if node is an Element
+      if (node.nodeType === Node.ELEMENT_NODE) {
+          const style = window.getComputedStyle(node);
+          const nonSelectableTags = ["SCRIPT", "STYLE", "NOSCRIPT"];
+          
+          // Skip non-selectable tags and hidden elements
+          if (
+              nonSelectableTags.includes(node.tagName) ||
+              style.visibility === "hidden" ||
+              style.display === "none"
+          ) {
+              return;
+          }
+      }
+
+      // Add text content if it's a text node
+      if (node.nodeType === Node.TEXT_NODE) {
+          selectableText += node.textContent;
+      }
+
+      // Traverse child nodes
+      node.childNodes.forEach(traverse);
+  }
+
+  traverse(div);
+  return selectableText.trim();
+}

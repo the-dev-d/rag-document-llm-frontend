@@ -141,11 +141,10 @@ class ApiService {
 
 export function createRegexPatternForLetters(input: string): string {
   const escapedInput = input.replace(/\(/g, '\\(').replace(/\)/g, '\\)');
-  const letters = escapedInput.match(/\\?.|./g) || [];
-  console.log(letters)
+  let letters = escapedInput.match(/\\?.|./g) || [];
+  letters = letters.map(letter => letter == " " ? " ?" : letter) as [];
   const regexPattern = letters.join('(?:<[^>]+>|(?: ))*');
-  return `(?:<[^\/>]+>|(?: ))${regexPattern}(?:</[^    const selection = ref<number|null>(null);
->]+>|(?: ))*`;
+  return `(?:<[^\/>]+>|(?: ))${regexPattern}(?:</[^>]+>|(?: ))*`;
 }
 
 
