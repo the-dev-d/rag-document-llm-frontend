@@ -136,7 +136,7 @@ import { match } from 'assert'
     if(!sidebar.status.value) {
       sidebar.status.value = true;
       nextTick(() => {
-        setTimeout(pageProcessing, 1000)
+        setTimeout(pageProcessing, 2000)
       })
       return;
     }
@@ -226,7 +226,7 @@ import { match } from 'assert'
 </script>
 
 <template>
-  <div class="grid w-full h-full relative place-items-center" :class="{ 'grid-cols-[1fr_auto]': sidebar.status.value }">
+  <div class="grid w-full h-full relative place-items-center" :class="{ 'grid-cols-2': sidebar.status.value }">
     <div class="w-full h-full grid p-1 md:p-3 gap-2 grid-rows-[1fr_auto]">
       <section ref="chatSection" class="grid content-start max-h-[96vh] h-full gap-5 overflow-y-auto scroll-smooth px-2">
         <div
@@ -316,6 +316,7 @@ import { match } from 'assert'
         <button @click="() => sidebar.status.value = false" type="button" class="m-3 text-white bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Collapse </button>
       </div>      
       <div
+      v-if="sidebar.status.value"
         class="w-full max-w-full h-full overflow-y-auto grid content-start scroll-smooth gap-1justify-center mt-1">
         <PDFViewer></PDFViewer>
         <!-- <DocxViewer v-if="dbManager.selected?.file_name.endsWith('.docx')"></DocxViewer> -->
