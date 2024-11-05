@@ -120,7 +120,7 @@ class ApiService {
       }
       this._socket.on("handle_chat", dbCreationHandler);
       this._socket.emit('chat_message', {
-        filename
+        file_name: filename
       });
     })
     const data = await p;
@@ -141,10 +141,10 @@ class ApiService {
 
 export function createRegexPatternForLetters(input: string): string {
   const escapedInput = input.replace(/\(/g, '\\(').replace(/\)/g, '\\)');
-  const letters = escapedInput.match(/\\?.|./g) || [];
-  console.log(letters)
+  let letters = escapedInput.match(/\\?.|./g) || [];
+  letters = letters.map(letter => letter == " " ? " ?" : letter) as [];
   const regexPattern = letters.join('(?:<[^>]+>|(?: ))*');
-  return `(?:<[^\/>]+>|(?: ))${regexPattern}(?:</[^>]+>|(?: ))*`;
+  return `(?:<[^\/>]+>|(?: )).{0,10}${regexPattern}(?:<\/[^>]+>)*`;
 }
 
 

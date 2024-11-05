@@ -93,7 +93,7 @@ import { match } from 'assert'
             console.log(pattern);
 
             const canvas = page.getElementsByTagName('canvas')[0];
-            const matchExp = page.innerHTML.match(pattern);
+            let matchExp = page.innerHTML.match(pattern);
 
             if(!matchExp)
               return;
@@ -103,7 +103,9 @@ import { match } from 'assert'
               return;
 
             const highlighed = selected[0].replace(/(<span\b[^>]*style=\"[^\"]*?)([^\"]*?)\"/g,'$1$2 background-color: yellow;\"');
-            if(matchExp.index)
+              console.log(highlighed);
+
+            if( matchExp && typeof(matchExp.index) == "number" && matchExp.index >= 0)
               page.innerHTML = page.innerHTML.slice(0, matchExp.index) + highlighed + page.innerHTML.slice(matchExp.index + matchExp[0].length);
 
             const newCanvas = page.getElementsByTagName('canvas')[0];
@@ -213,7 +215,7 @@ import { match } from 'assert'
 </script>
 
 <template>
-  <div class="grid w-full h-full relative place-items-center" :class="{ 'grid-cols-[1fr_auto]': !sidebar.status.value }">
+  <div class="grid w-full h-full relative place-items-center" :class="{ 'grid-cols-2': !sidebar.status.value }">
     <div class="w-full h-full grid p-1 md:p-3 gap-2">
       <section ref="chatSection" class="grid content-start max-h-[96vh] h-full gap-5 overflow-y-auto scroll-smooth px-2">
         <div
