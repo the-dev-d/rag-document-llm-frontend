@@ -291,7 +291,7 @@ import { match } from 'assert'
       <div class="h-full px-2  bg-white border-b-2">
         <button @click="() => sidebar.status.value = true" type="button" class="m-3 text-white bg-dark-primary-medium hover:bg-dark-primary-darker focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Collapse </button>
       </div>      
-      <div
+      <div v-if="!sidebar.status.value"
         class="w-full max-w-full h-full overflow-y-auto grid content-start scroll-smooth gap-1justify-center mt-1">
         <PDFViewer></PDFViewer>
         <!-- <DocxViewer v-if="dbManager.selected?.file_name.endsWith('.docx')"></DocxViewer> -->

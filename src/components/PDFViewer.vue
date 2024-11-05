@@ -10,25 +10,22 @@
     fileURL = fileURL + ".pdf";
   }
   const { pdf, pages } = usePDF(fileURL)
+  const parent = ref<HTMLElement|null>(null);
 
   let height = 0;
+  let width = ref(0);
   onMounted(() => {
-    const {innerHeight, innerWidth} = window;
-    if(innerWidth > innerHeight) {
-      height = innerHeight;
-    }else {
-      height = innerHeight / 1.7;
-    }
+    width.value = (parent.value as HTMLElement).offsetWidth
   })
 
 </script>
 
 <template>
-  <div class="grid place-items-center">
-    <div class="w-fit mb-2" data-page v-for="page in pages" :id="'page-' + page" :key="page">
+  <div ref="parent" class="grid place-items-center">
+    <div  class="w-full grid mb-2" data-page v-for="page in pages" :id="'page-' + page" :key="page">
       <VuePDF
+      :width
       text-layer
-      :height
       :page="page"
       :pdf="pdf">
     </VuePDF>
